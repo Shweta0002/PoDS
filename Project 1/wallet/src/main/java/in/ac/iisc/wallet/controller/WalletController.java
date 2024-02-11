@@ -9,13 +9,13 @@ import in.ac.iisc.wallet.model.WalletTransaction;
 import in.ac.iisc.wallet.repository.WalletRepository;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/wallets")
 public class WalletController {
 
     @Autowired
     private WalletRepository walletRepository;
 
-    @GetMapping("/wallets/{userId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<?> getUserWallet(@PathVariable Integer userId) {
         try {
             if (userId == null) {
@@ -34,7 +34,7 @@ public class WalletController {
         }
     }
 
-    @PutMapping("/wallets/{userId}")
+    @PutMapping("/{userId}")
     public ResponseEntity<?> updateBalance(@PathVariable Integer userId, @RequestBody WalletTransaction transaction) {
         try {
             Wallet w = walletRepository.findByUserId(userId);
@@ -61,7 +61,7 @@ public class WalletController {
         }
     }
 
-    @DeleteMapping("/wallets/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteWallet(@PathVariable Integer userId) {
         try {
             Wallet w = walletRepository.findByUserId(userId);
@@ -76,7 +76,7 @@ public class WalletController {
         }
     }
 
-    @DeleteMapping("/wallets")
+    @DeleteMapping
     public ResponseEntity<?> deleteAllWallets() {
         try {
             walletRepository.deleteAll();

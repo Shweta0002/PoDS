@@ -6,18 +6,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import in.ac.iisc.users.model.Users;
 import in.ac.iisc.users.repository.UsersRepository;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/users")
 public class UsersController {
 
     @Autowired
     private UsersRepository usersRepository;
 
-    @GetMapping("users/{userId}")
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @GetMapping("/{userId}")
     public ResponseEntity<?> getUser(@PathVariable Integer userId) {
         try {
             if (userId == null) {
@@ -36,7 +40,7 @@ public class UsersController {
         }
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public ResponseEntity<?> addUser(@RequestBody Users user) {
         try {
             List<Users> existingUsers = usersRepository.findByEmail(user.getEmail());
@@ -54,7 +58,7 @@ public class UsersController {
         }
     }
 
-    @DeleteMapping("users/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer userId) {
         try {
             // TODO: is this even required
@@ -70,9 +74,12 @@ public class UsersController {
         }
     }
 
-    @DeleteMapping("/users")
+    @DeleteMapping
     public ResponseEntity<?> deleteAllUsers() {
         try {
+            
+            restTemplate.delete("http://localhost:8081/wallets");
+
             usersRepository.deleteAll();
             return ResponseEntity.ok("All users successfully deleted !!");
         } catch (Exception e) {
