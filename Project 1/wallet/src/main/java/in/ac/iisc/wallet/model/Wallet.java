@@ -24,4 +24,12 @@ public class Wallet {
     public Integer getBalance() {
         return this.balance;
     }
+
+	public void setUserId(Integer userId) {
+		this.userId = userId;
+	}
+
+	public void setBalance(Integer balance) {
+		this.balance = balance;
+	}
 }
