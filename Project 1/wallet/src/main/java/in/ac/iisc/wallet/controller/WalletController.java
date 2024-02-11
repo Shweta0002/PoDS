@@ -24,7 +24,7 @@ public class WalletController {
             Wallet w = walletRepository.findByUserId(userId);
 
             if (w != null) {
-                return ResponseEntity.ok(w.getBalance());
+                return new ResponseEntity<>(w, HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }

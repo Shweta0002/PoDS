@@ -66,6 +66,10 @@ public class UsersController {
             if (u == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+
+            // TODO: Delete Bookings for this userId
+            restTemplate.delete("http://localhost:8082/wallets/{userId}");
+
             usersRepository.deleteById(userId);
             return ResponseEntity.ok("User successfully deleted !!");
         } catch (Exception e) {
@@ -77,8 +81,8 @@ public class UsersController {
     @DeleteMapping
     public ResponseEntity<?> deleteAllUsers() {
         try {
-            
-            restTemplate.delete("http://localhost:8081/wallets");
+            // TODO: Delete Bookings for all userId
+            restTemplate.delete("http://localhost:8082/wallets");
 
             usersRepository.deleteAll();
             return ResponseEntity.ok("All users successfully deleted !!");
