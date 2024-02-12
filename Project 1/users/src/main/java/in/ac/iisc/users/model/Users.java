@@ -10,19 +10,17 @@ import lombok.*;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 public class Users {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userIdGen")
-    @SequenceGenerator(name = "userIdGen", initialValue = 1, allocationSize = 1)
-    Integer userId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userIdGen")
+	@SequenceGenerator(name = "userIdGen", initialValue = 1, allocationSize = 1)
+	Integer userId;
 
-    String name;
+	String name;
 
-    @Column(unique = true)
-    String email;
+	@Column(unique = true)
+	String email;
 
 	public Integer getUserId() {
 		return userId;
