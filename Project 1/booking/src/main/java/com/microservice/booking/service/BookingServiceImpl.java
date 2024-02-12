@@ -109,18 +109,27 @@ public class BookingServiceImpl implements BookingService {
 	public void deleteAllBooking() {
 		// TODO Auto-generated method stub
 		
+		
 	}
 
 	@Override
-	public List<Booking> getAllBookingsByUserId(Long user_id) {
+	public List<Booking> getAllBookingsByUserId(Integer user_id) {
 		// TODO Auto-generated method stub
-		return bookingRepo.findAllbyUserId(int(user_id));
+		return bookingRepo.findAllbyUserId(user_id);
 	}
 
 	@Override
 	public List<Booking> getAllBookings() {
 		// TODO Auto-generated method stub
 		return bookingRepo.findAll();
+	}
+
+	@Override
+	public void deleteBookingofUserByShowId(Integer user_id, Long show_id) {
+		List<Booking> alluserBookings = getAllBookingsByUserId(user_id);
+		
+		
+		
 	}
 
 }

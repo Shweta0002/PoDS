@@ -20,4 +20,6 @@ public interface BookingService {
 
 	List<Booking> getAllBookings();
 
+	void deleteBookingofUserByShowId(Integer user_id, Long show_id);
+
 }

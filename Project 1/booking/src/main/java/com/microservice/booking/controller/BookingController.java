@@ -49,9 +49,9 @@ public class BookingController {
 	}
 	
 	@GetMapping("/bookings/users/{user_id}")
-	private ResponseEntity<List<Booking>> getAllBookingsByUserId(@PathVariable Integer User_id) {
+	private ResponseEntity<List<Booking>> getAllBookingsByUserId(@PathVariable Integer user_id) {
 		try {
-			List<Booking> bookings = bookingService.getAllBookingsByUserId(User_id);
+			List<Booking> bookings = bookingService.getAllBookingsByUserId(user_id);
 			if (bookings.isEmpty())
 				return new ResponseEntity<List<Booking>>(HttpStatus.NO_CONTENT);
 			else
@@ -83,10 +83,10 @@ public class BookingController {
 	private ResponseEntity<?> addBooking(@RequestBody Booking booking) {
 		try {
 			System.out.println("hello");
-			ResponseEntity<Booking> booking1 = (ResponseEntity<Booking>) bookingService.addBooking(booking);
+			ResponseEntity<?> booking1 = bookingService.addBooking(booking);
 			if(booking1.getStatusCode().is2xxSuccessful()) {
-				Booking newBooking = booking1.getBody();
-				return new ResponseEntity<Booking>(newBooking,HttpStatus.CREATED);
+				//Booking newBooking = booking1.getBody();
+				return new ResponseEntity<>(HttpStatus.CREATED);
 			}
 			else {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
