@@ -1,5 +1,7 @@
 package com.microservice.booking.controller;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import com.microservice.booking.exceptions.DataNotFoundException;
 import com.microservice.booking.service.BookingService;
 import com.microservice.booking.service.ShowService;
 import com.microservice.booking.service.TheatreService;
+import jakarta.annotation.PostConstruct;
 
 @Controller
 public class BookingController {
@@ -31,6 +34,50 @@ public class BookingController {
 
 	@Autowired
 	private BookingService bookingService;
+
+	@PostConstruct
+	public void init() {
+		try {
+			String line = "";
+			BufferedReader br = new BufferedReader(new FileReader(
+					"Project 1\\booking\\src\\main\\java\\com\\microservice\\booking\\data\\theatres.csv"));
+			System.out.println();
+			int i = 0;
+			while ((line = br.readLine()) != null) // returns a Boolean value
+			{
+				if (i != 0) {
+					String[] str = line.split(","); // use comma as separator
+					Theatre t = new Theatre();
+					t.setName(str[1]);
+					t.setLocation(str[2]);
+					theatreService.addTheatre(t);
+				}
+				i++;
+			}
+			br.close();
+
+			br = new BufferedReader(
+					new FileReader("Project 1\\booking\\src\\main\\java\\com\\microservice\\booking\\data\\shows.csv"));
+			System.out.println();
+			i = 0;
+			while ((line = br.readLine()) != null) {
+				if (i != 0) {
+					String[] str = line.split(",");
+					Show s = new Show();
+					s.setTheatre_id(Long.parseLong(str[1]));
+					s.setTitle(str[2]);
+					s.setPrice(Long.parseLong(str[3]));
+					s.setSeats_available(Long.parseLong(str[4]));
+					showService.addShow(s);
+				}
+				i++;
+			}
+			br.close();
+
+		} catch (Exception e) {
+
+		}
+	}
 
 	@DeleteMapping("/bookings/users/{user_id}/shows/{show_id}")
 	private ResponseEntity<?> deleteBookingofUserByShowId(@PathVariable Integer user_id, @PathVariable Long show_id) {
