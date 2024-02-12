@@ -91,7 +91,6 @@ public class BookingController {
 		try {
 			System.out.println("hello");
 			return bookingService.addBooking(booking);
-			
 
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
@@ -155,7 +154,7 @@ public class BookingController {
 	private ResponseEntity<?> addShow(@RequestBody Show show) {
 		try {
 			return showService.addShow(show);
-			
+
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
