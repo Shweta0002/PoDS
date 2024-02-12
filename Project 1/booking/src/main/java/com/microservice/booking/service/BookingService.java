@@ -21,5 +21,7 @@ public interface BookingService {
 	List<Booking> getAllBookings();
 
 	ResponseEntity<?> deleteBookingofUserByShowId(Integer user_id, Long show_id);
+	ResponseEntity<?> deleteAllUserBookings(Integer user_id);
+
 
 }
