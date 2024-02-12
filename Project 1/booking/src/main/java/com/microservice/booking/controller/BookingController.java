@@ -20,34 +20,42 @@ import com.microservice.booking.service.BookingService;
 import com.microservice.booking.service.ShowService;
 import com.microservice.booking.service.TheatreService;
 
-
-
-
 @Controller
 public class BookingController {
 
 	@Autowired
 	private ShowService showService;
-	
+
 	@Autowired
 	private TheatreService theatreService;
-	
+
 	@Autowired
 	private BookingService bookingService;
-	
+
 	@DeleteMapping("/bookings/users/{user_id}/shows/{show_id}")
-	private ResponseEntity<List<Booking>> deleteBookingofUserByShowId(@PathVariable Integer user_id , @PathVariable Long show_id) {
+	private ResponseEntity<List<Booking>> deleteBookingofUserByShowId(@PathVariable Integer user_id,
+			@PathVariable Long show_id) {
 		try {
-			bookingService.deleteBookingofUserByShowId(user_id , show_id);
+			bookingService.deleteBookingofUserByShowId(user_id, show_id);
 			return new ResponseEntity<>(HttpStatus.OK);
 
 		} catch (DataNotFoundException e) {
-            return ResponseEntity.notFound().build();
-		}catch (Exception e) {
+			return ResponseEntity.notFound().build();
+		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+	@DeleteMapping("/bookings/users/{user_id}")
+	private ResponseEntity<?> deleteUserBookings(@PathVariable Integer user_id) {
+		try {
+			return bookingService.deleteAllUserBookings(user_id);
+
+		} catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	@GetMapping("/bookings/users/{user_id}")
 	private ResponseEntity<List<Booking>> getAllBookingsByUserId(@PathVariable Integer user_id) {
 		try {
@@ -58,11 +66,12 @@ public class BookingController {
 				return new ResponseEntity<List<Booking>>(bookings, HttpStatus.OK);
 
 		} catch (DataNotFoundException e) {
-            return ResponseEntity.notFound().build();
-		}catch (Exception e) {
+			return ResponseEntity.notFound().build();
+		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
 	@GetMapping("/bookings/users/")
 	private ResponseEntity<List<Booking>> getAllBookings() {
 		try {
@@ -73,50 +82,39 @@ public class BookingController {
 				return new ResponseEntity<List<Booking>>(bookings, HttpStatus.OK);
 
 		} catch (DataNotFoundException e) {
-            return ResponseEntity.notFound().build();
-		}catch (Exception e) {
+			return ResponseEntity.notFound().build();
+		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@PostMapping("/bookings")
 	private ResponseEntity<?> addBooking(@RequestBody Booking booking) {
 		try {
 			System.out.println("hello");
 			ResponseEntity<?> booking1 = bookingService.addBooking(booking);
-			if(booking1.getStatusCode().is2xxSuccessful()) {
-				//Booking newBooking = booking1.getBody();
+			if (booking1.getStatusCode().is2xxSuccessful()) {
+				// Booking newBooking = booking1.getBody();
 				return new ResponseEntity<>(HttpStatus.CREATED);
-			}
-			else {
+			} else {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-		
 
 		} catch (Exception e) {
-			
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
-	
-	
-	@DeleteMapping("/delete/bookings")
-	private ResponseEntity<?>  deleteAllBooking(){
-		
-		bookingService.deleteAllBooking();
 
+	@DeleteMapping("/delete/bookings")
+	private ResponseEntity<?> deleteAllBooking() {
+		bookingService.deleteAllBooking();
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
-	
-	
-	
-	
-	
+
 	@GetMapping("/shows/{show_id}")
 	private ResponseEntity<?> getShow(@PathVariable Long show_id) {
 		try {
-			Show show= showService.getShowById(show_id);
-
+			Show show = showService.getShowById(show_id);
 			return new ResponseEntity<Show>(show, HttpStatus.OK);
 
 		} catch (Exception e) {
@@ -126,7 +124,7 @@ public class BookingController {
 				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@GetMapping("shows/theatres/{theatre_id}")
 	private ResponseEntity<List<Show>> getAllShowByTheatreId(@PathVariable Long theatre_id) {
 		try {
@@ -137,13 +135,12 @@ public class BookingController {
 				return new ResponseEntity<List<Show>>(shows, HttpStatus.OK);
 
 		} catch (DataNotFoundException e) {
-            return ResponseEntity.notFound().build();
-		}catch (Exception e) {
+			return ResponseEntity.notFound().build();
+		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	
+
 	@GetMapping("/get/shows")
 	private ResponseEntity<List<Show>> getAllShows() {
 		try {
@@ -157,7 +154,7 @@ public class BookingController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@PostMapping("/add/show")
 	private ResponseEntity<Show> addShow(@RequestBody Show show) {
 		try {
@@ -168,8 +165,7 @@ public class BookingController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	
+
 	@GetMapping("/theatres")
 	private ResponseEntity<List<Theatre>> getAllTheatres() {
 		try {
@@ -183,7 +179,7 @@ public class BookingController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
 	@PostMapping("/add/theatre")
 	private ResponseEntity<Theatre> addTheatre(@RequestBody Theatre theatre) {
 		try {
@@ -194,5 +190,4 @@ public class BookingController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
 }

@@ -20,6 +20,8 @@ public interface BookingService {
 
 	List<Booking> getAllBookings();
 
+	ResponseEntity<?> deleteAllUserBookings(Integer user_id);
+
 	void deleteBookingofUserByShowId(Integer user_id, Long show_id);
 
 }
