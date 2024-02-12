@@ -90,13 +90,8 @@ public class BookingController {
 	private ResponseEntity<?> addBooking(@RequestBody Booking booking) {
 		try {
 			System.out.println("hello");
-			ResponseEntity<?> booking1 = bookingService.addBooking(booking);
-			if (booking1.getStatusCode().is2xxSuccessful()) {
-				// Booking newBooking = booking1.getBody();
-				return new ResponseEntity<>(HttpStatus.CREATED);
-			} else {
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			}
+			return bookingService.addBooking(booking);
+			
 
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
@@ -157,11 +152,10 @@ public class BookingController {
 	}
 
 	@PostMapping("/add/show")
-	private ResponseEntity<Show> addShow(@RequestBody Show show) {
+	private ResponseEntity<?> addShow(@RequestBody Show show) {
 		try {
-			Show show1 = showService.addShow(show);
-			return new ResponseEntity<Show>(show1, HttpStatus.CREATED);
-
+			return showService.addShow(show);
+			
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}

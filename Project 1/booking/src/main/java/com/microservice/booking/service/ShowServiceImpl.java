@@ -1,19 +1,25 @@
 package com.microservice.booking.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.microservice.booking.entities.Booking;
 import com.microservice.booking.entities.Show;
 import com.microservice.booking.repository.ShowRepository;
+import com.microservice.booking.repository.TheatreRepository;
 
 @Service
 public class ShowServiceImpl implements ShowService {
 
 	@Autowired
 	private ShowRepository showRepo;
+	
+	@Autowired
+	private TheatreRepository theatreRepo;
 	
 	public ShowServiceImpl() {
 		// TODO Auto-generated constructor stub
@@ -26,9 +32,17 @@ public class ShowServiceImpl implements ShowService {
 	}
 
 	@Override
-	public Show addShow(Show show) {
+	public ResponseEntity<?> addShow(Show show) {
 		// TODO Auto-generated method stub
-		return showRepo.save(show);
+		if(theatreRepo.getTheatrebyId(show.getTheatre_id())!=null)
+		{
+			showRepo.save(show);
+			return new ResponseEntity<Show>(show, HttpStatus.OK); 
+		}
+		else {
+			return ResponseEntity.badRequest().body("Theatre_id not found");
+		}
+		 
 	}
 
 	@Override

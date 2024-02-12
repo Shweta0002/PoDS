@@ -74,20 +74,29 @@ public class BookingServiceImpl implements BookingService {
 			ResponseEntity<Wallet> response = restTemplate.exchange(
 					"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
 			System.out.println("erro5");
-			Booking booking1 = new Booking();
-			booking1.setUser_id(User_id);
-			booking1.setShow_id(show_id);
-			booking1.setSeats_booked(booking.getSeats_booked());
+			Booking bookingOfUserWithSameShow_id = bookingRepo.findByUserIdShowId(User_id , show_id);
+			if(bookingOfUserWithSameShow_id != null) {
+				bookingOfUserWithSameShow_id.setSeats_booked(booking.getSeats_booked()+bookingOfUserWithSameShow_id.getSeats_booked());
+				bookingRepo.save(bookingOfUserWithSameShow_id);
+			}
+			else {
+				Booking booking1 = new Booking();
+				booking1.setUser_id(User_id);
+				booking1.setShow_id(show_id);
+				booking1.setSeats_booked(booking.getSeats_booked());
+				bookingRepo.save(booking1);
+			}
+			
 
 			// Update the number of seats available for the show
 			show.setSeats_available(show.getSeats_available() - booking.getSeats_booked());
 
 			// Save the changes
 			showRepo.save(show);
-			bookingRepo.save(booking1);
+			
 			System.out.println("error8");
 
-			return ResponseEntity.ok("Booking created successfully");
+			return new ResponseEntity<Booking>(booking, HttpStatus.OK);
 		} else {
 			// User not found, return a 400 Bad Request response
 			return ResponseEntity.badRequest().body("User not found");
