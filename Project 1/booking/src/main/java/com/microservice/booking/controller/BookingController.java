@@ -93,11 +93,12 @@ public class BookingController {
 			return bookingService.addBooking(booking);
 
 		} catch (Exception e) {
+			System.out.println("Error here");
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
 
-	@DeleteMapping("/delete/bookings")
+	@DeleteMapping("/bookings")
 	private ResponseEntity<?> deleteAllBooking() {
 		try {
 			return bookingService.deleteAllBooking();

@@ -47,61 +47,70 @@ public class BookingServiceImpl implements BookingService {
 			return ResponseEntity.badRequest().body("Show not found");
 		}
 		System.out.println("erro1");
-		ResponseEntity<Users> userResponse = restTemplate.getForEntity("http://localhost:8080/users/" + User_id,
-				Users.class);
-		ResponseEntity<Wallet> wallet = restTemplate.getForEntity("http://localhost:8082/wallets/" + User_id,
-				Wallet.class);
-		System.out.println("erro2");
-		if (userResponse.getStatusCode().is2xxSuccessful() && wallet.getStatusCode().is2xxSuccessful()) {
-			if (show.getSeats_available() < booking.getSeats_booked()) {
-				return ResponseEntity.badRequest().body("Seats not available");
-			}
-			System.out.println("erro3");
-			// Calculate the total cost based on the price of the show and the number of
-			// seats booked
-			Integer totalCost = (int) (show.getPrice() * booking.getSeats_booked());
-			if (wallet.getBody().getBalance() < totalCost) {
-				return ResponseEntity.badRequest().body("Insufficient Balance");
-			}
-
-			// Deduct the amount from the user's wallet
-			System.out.println("erro4");
-			HttpHeaders headers = new HttpHeaders();
-			// set all headers
-			headers.setContentType(MediaType.APPLICATION_JSON);
-			RequestWalletTranscationTemplate data = new RequestWalletTranscationTemplate("debit", totalCost);
-			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
-			ResponseEntity<Wallet> response = restTemplate.exchange(
-					"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
-			System.out.println("erro5");
-			Booking bookingOfUserWithSameShow_id = bookingRepo.findByUserIdShowId(User_id , show_id);
-			if(bookingOfUserWithSameShow_id != null) {
-				bookingOfUserWithSameShow_id.setSeats_booked(booking.getSeats_booked()+bookingOfUserWithSameShow_id.getSeats_booked());
-				bookingRepo.save(bookingOfUserWithSameShow_id);
-			}
-			else {
-				Booking booking1 = new Booking();
-				booking1.setUser_id(User_id);
-				booking1.setShow_id(show_id);
-				booking1.setSeats_booked(booking.getSeats_booked());
-				bookingRepo.save(booking1);
-			}
-			
-
-			// Update the number of seats available for the show
-			show.setSeats_available(show.getSeats_available() - booking.getSeats_booked());
-
-			// Save the changes
-			showRepo.save(show);
-			
-			System.out.println("error8");
-
-			return new ResponseEntity<Booking>(booking, HttpStatus.OK);
-		} else {
-			// User not found, return a 400 Bad Request response
+		ResponseEntity<Users> userResponse =null;
+		ResponseEntity<Wallet> wallet =null;
+		try {
+			 userResponse = restTemplate.getForEntity("http://localhost:8080/users/" + User_id,
+					Users.class);
+		}catch(Exception e) {
+			return ResponseEntity.badRequest().body("Wallet not found");
+		}
+		try {
+			 wallet = restTemplate.getForEntity("http://localhost:8082/wallets/" + User_id,
+					Wallet.class);
+		}catch(Exception e) {
 			return ResponseEntity.badRequest().body("User not found");
 		}
+		
+		
+		System.out.println("erro2");
+		
+		if (show.getSeats_available() < booking.getSeats_booked()) {
+			return ResponseEntity.badRequest().body("Seats not available");
+		}
+		System.out.println("erro3");
+		// Calculate the total cost based on the price of the show and the number of
+		// seats booked
+		Integer totalCost = (int) (show.getPrice() * booking.getSeats_booked());
+		if (wallet.getBody().getBalance() < totalCost) {
+			return ResponseEntity.badRequest().body("Insufficient Balance");
+		}
 
+		// Deduct the amount from the user's wallet
+		System.out.println("erro4");
+		HttpHeaders headers = new HttpHeaders();
+		// set all headers
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		RequestWalletTranscationTemplate data = new RequestWalletTranscationTemplate("debit", totalCost);
+		HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
+		ResponseEntity<Wallet> response = restTemplate.exchange(
+				"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
+		System.out.println("erro5");
+		Booking bookingOfUserWithSameShow_id = bookingRepo.findByUserIdShowId(User_id , show_id);
+		Booking newBooking;
+		if(bookingOfUserWithSameShow_id != null) {
+			bookingOfUserWithSameShow_id.setSeats_booked(booking.getSeats_booked()+bookingOfUserWithSameShow_id.getSeats_booked());
+			newBooking=bookingRepo.save(bookingOfUserWithSameShow_id);
+		}
+		else {
+			Booking booking1 = new Booking();
+			booking1.setUser_id(User_id);
+			booking1.setShow_id(show_id);
+			booking1.setSeats_booked(booking.getSeats_booked());
+			newBooking = bookingRepo.save(booking1);
+		}
+		
+
+		// Update the number of seats available for the show
+		show.setSeats_available(show.getSeats_available() - booking.getSeats_booked());
+
+		// Save the changes
+		showRepo.save(show);
+		
+		System.out.println("error8");
+
+		return new ResponseEntity<Booking>(newBooking, HttpStatus.OK);
+		
 	}
 
 	@Override
