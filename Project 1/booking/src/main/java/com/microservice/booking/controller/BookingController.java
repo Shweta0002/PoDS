@@ -36,10 +36,10 @@ public class BookingController {
 	private BookingService bookingService;
 	
 	@DeleteMapping("/bookings/users/{user_id}/shows/{show_id}")
-	private ResponseEntity<List<Booking>> deleteBookingofUserByShowId(@PathVariable Integer user_id , @PathVariable Long show_id) {
+	private ResponseEntity<?> deleteBookingofUserByShowId(@PathVariable Integer user_id , @PathVariable Long show_id) {
 		try {
-			bookingService.deleteBookingofUserByShowId(user_id , show_id);
-			return new ResponseEntity<>(HttpStatus.OK);
+			
+			return bookingService.deleteBookingofUserByShowId(user_id , show_id);
 
 		} catch (DataNotFoundException e) {
             return ResponseEntity.notFound().build();
