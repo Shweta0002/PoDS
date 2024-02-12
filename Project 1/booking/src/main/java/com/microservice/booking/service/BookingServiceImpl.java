@@ -96,9 +96,33 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	public void deleteAllBooking() {
-		// TODO Auto-generated method stub
+	public ResponseEntity<?> deleteAllBooking() {
+		List<Booking> bookings = getAllBookings();
 
+		if (bookings == null || bookings.size() == 0) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+
+		// 1. seat to be returned to available pool (show_id - add seats_booked)
+		for (Booking b : bookings) {
+			Show show = showRepo.getbyShowId(b.getShow_id());
+			show.setSeats_available(show.getSeats_available() + b.getSeats_booked());
+			showRepo.save(show);
+
+			// 2. The amounts that were taken to make these bookings are returned to the
+			// user’s wallet.
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			Integer totalCost = (int) (b.getSeats_booked() * show.getPrice());
+			RequestWalletTranscationTemplate data = new RequestWalletTranscationTemplate("credit", totalCost);
+			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
+			restTemplate.exchange(
+					"http://localhost:8082/wallets/" + b.getUser_id(), HttpMethod.PUT, requestEntity, Wallet.class);
+
+			bookingRepo.delete(b);
+		}
+
+		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override
@@ -116,26 +140,26 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	public ResponseEntity<?> deleteBookingofUserByShowId(Integer user_id, Long show_id) {
 		List<Booking> alluserBookings = getAllBookingsByUserId(user_id);
-		for(Booking b : alluserBookings) {
-			if(b.getShow_id()==show_id) {
+		for (Booking b : alluserBookings) {
+			if (b.getShow_id() == show_id) {
 				Show show = showRepo.getbyShowId(show_id);
-				Integer totalCost = (int)( show.getPrice()*b.getSeats_booked());
-				//creating response entity to update wallet
-				 HttpHeaders headers=new HttpHeaders();
-	            // set all headers
-	            headers.setContentType(MediaType.APPLICATION_JSON);
-	            RequestWalletTranscationTemplate data = new RequestWalletTranscationTemplate("credit" , totalCost);
-	            HttpEntity<?> requestEntity = new HttpEntity<Object>(data,headers);
-	            ResponseEntity<Wallet> response = restTemplate.exchange(
-	            		"http://localhost:8082/wallets/"+user_id, HttpMethod.PUT, requestEntity , Wallet.class); 
-	            show.setSeats_available(show.getSeats_available()+b.getSeats_booked());
-	            bookingRepo.delete(b);
-	            showRepo.save(show);
+				Integer totalCost = (int) (show.getPrice() * b.getSeats_booked());
+				// creating response entity to update wallet
+				HttpHeaders headers = new HttpHeaders();
+				// set all headers
+				headers.setContentType(MediaType.APPLICATION_JSON);
+				RequestWalletTranscationTemplate data = new RequestWalletTranscationTemplate("credit", totalCost);
+				HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
+				ResponseEntity<Wallet> response = restTemplate.exchange(
+						"http://localhost:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity, Wallet.class);
+				show.setSeats_available(show.getSeats_available() + b.getSeats_booked());
+				bookingRepo.delete(b);
+				showRepo.save(show);
 				return ResponseEntity.ok("Booking deleted successfully");
 			}
-			
+
 		}
-		return ResponseEntity.badRequest().body("Not Found");		
+		return ResponseEntity.badRequest().body("Not Found");
 
 	}
 

@@ -14,14 +14,14 @@ public interface BookingService {
 
 	ResponseEntity<?> addBooking(Booking booking);
 
-	void deleteAllBooking();
+	ResponseEntity<?> deleteAllBooking();
 
 	List<Booking> getAllBookingsByUserId(Integer user_id);
 
 	List<Booking> getAllBookings();
 
 	ResponseEntity<?> deleteBookingofUserByShowId(Integer user_id, Long show_id);
-	ResponseEntity<?> deleteAllUserBookings(Integer user_id);
 
+	ResponseEntity<?> deleteAllUserBookings(Integer user_id);
 
 }
