@@ -44,7 +44,7 @@ public class UsersController {
     public ResponseEntity<?> addUser(@RequestBody Users user) {
         try {
             List<Users> existingUsers = usersRepository.findByEmail(user.getEmail());
-
+            System.out.println("user");
             if (existingUsers.size() != 0) {
                 return ResponseEntity.badRequest()
                         .body("Email ID already exists. Please provide another email ID !!");
