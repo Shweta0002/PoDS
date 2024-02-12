@@ -2,6 +2,7 @@ package com.microservice.booking.service;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.microservice.booking.entities.Booking;
@@ -11,10 +12,12 @@ public interface BookingService {
 
 	boolean getBookingById(Long bookingId);
 
-	Booking addBooking(Booking booking);
+	ResponseEntity<?> addBooking(Booking booking);
 
 	void deleteAllBooking();
 
-	List<Booking> getAllBookingsByUserId(Long user_id);
+	List<Booking> getAllBookingsByUserId(Integer user_id);
+
+	List<Booking> getAllBookings();
 
 }

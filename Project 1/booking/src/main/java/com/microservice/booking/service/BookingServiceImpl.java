@@ -1,12 +1,18 @@
 package com.microservice.booking.service;
 
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.microservice.booking.VO.RequestWalletTranscationTemplate;
 import com.microservice.booking.VO.Users;
 import com.microservice.booking.VO.Wallet;
 import com.microservice.booking.entities.Booking;
@@ -40,24 +46,63 @@ public class BookingServiceImpl implements BookingService {
 	
 	
 	@Override
-	public Booking addBooking(Booking booking) {
+	public ResponseEntity<?> addBooking(Booking booking) {
 		Long show_id=booking.getShow_id();
 		Integer User_id=booking.getUser_id();
-		System.out.print(User_id);
-		ResponseEntity<Users> userExists= restTemplate.getForEntity("http://localhost:8080/users/"+User_id, 
+		Show show = showRepo.getbyShowId(show_id);
+		
+		if(show==null) {
+			return ResponseEntity.badRequest().body("Show not found");
+		}
+		System.out.println("erro1");
+		ResponseEntity<Users> userResponse= restTemplate.getForEntity("http://localhost:8080/users/"+User_id, 
 				Users.class);
 		ResponseEntity<Wallet> wallet= restTemplate.getForEntity("http://localhost:8082/wallets/"+User_id, 
 				Wallet.class);
-		Show show = showRepo.getbyShowId(show_id);
-//		if(wallet.get
-//		}
-//		
-		if(showRepo.existsById(show_id) ) {
-			System.out.println("Yes show exists");
-		}
-		System.out.print(userExists.toString());
+		System.out.println("erro2");
+		if (userResponse.getStatusCode().is2xxSuccessful() && wallet.getStatusCode().is2xxSuccessful()) {
+            if(show.getSeats_available()<booking.getSeats_booked()) {
+            	return ResponseEntity.badRequest().body("Seats not available");
+            }
+            System.out.println("erro3");
+            // Calculate the total cost based on the price of the show and the number of seats booked
+            Integer totalCost = (int)(show.getPrice() * booking.getSeats_booked());
+            if(wallet.getBody().getBalance()<totalCost) {
+            	return ResponseEntity.badRequest().body("Insufficient Balance");
+            }
+        
+            // Deduct the amount from the user's wallet
+            System.out.println("erro4");
+            HttpHeaders headers=new HttpHeaders();
+            // set all headers
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            RequestWalletTranscationTemplate data = new RequestWalletTranscationTemplate("debit" , totalCost);
+            HttpEntity<?> requestEntity = new HttpEntity<Object>(data,headers);
+            ResponseEntity<Wallet> response = restTemplate.exchange(
+            		"http://localhost:8082/wallets/"+User_id, HttpMethod.PUT, requestEntity , Wallet.class);   
+            System.out.println("erro5");
+            Booking booking1 = new Booking();
+            booking1.setUser_id(User_id);
+            booking1.setShow_id(show_id);
+            booking1.setSeats_booked(booking.getSeats_booked());
+
+            // Update the number of seats available for the show
+            show.setSeats_available(show.getSeats_available() - booking.getSeats_booked());
+
+            // Save the changes
+            showRepo.save(show);
+            bookingRepo.save(booking1);
+            System.out.println("error8");
+    		
+            return ResponseEntity.ok("Booking created successfully");
+        } else {
+            // User not found, return a 400 Bad Request response
+            return ResponseEntity.badRequest().body("User not found");
+        }
 		
-		return booking;
+		
+
+		
 	}
 
 	@Override
@@ -69,7 +114,15 @@ public class BookingServiceImpl implements BookingService {
 	@Override
 	public List<Booking> getAllBookingsByUserId(Long user_id) {
 		// TODO Auto-generated method stub
-		return null;
+		return bookingRepo.findAllbyUserId(int(user_id));
+	}
+
+	@Override
+	public List<Booking> getAllBookings() {
+		// TODO Auto-generated method stub
+		return bookingRepo.findAll();
 	}
 
 }
+
+

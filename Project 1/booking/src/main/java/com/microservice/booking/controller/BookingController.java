@@ -35,9 +35,21 @@ public class BookingController {
 	@Autowired
 	private BookingService bookingService;
 	
+	@DeleteMapping("/bookings/users/{user_id}/shows/{show_id}")
+	private ResponseEntity<List<Booking>> deleteBookingofUserByShowId(@PathVariable Integer user_id , @PathVariable Long show_id) {
+		try {
+			bookingService.deleteBookingofUserByShowId(user_id , show_id);
+			return new ResponseEntity<>(HttpStatus.OK);
+
+		} catch (DataNotFoundException e) {
+            return ResponseEntity.notFound().build();
+		}catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@GetMapping("/bookings/users/{user_id}")
-	private ResponseEntity<List<Booking>> getAllBookingsByUserId(@PathVariable Long User_id) {
+	private ResponseEntity<List<Booking>> getAllBookingsByUserId(@PathVariable Integer User_id) {
 		try {
 			List<Booking> bookings = bookingService.getAllBookingsByUserId(User_id);
 			if (bookings.isEmpty())
@@ -51,18 +63,39 @@ public class BookingController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+	@GetMapping("/bookings/users/")
+	private ResponseEntity<List<Booking>> getAllBookings() {
+		try {
+			List<Booking> bookings = bookingService.getAllBookings();
+			if (bookings.isEmpty())
+				return new ResponseEntity<List<Booking>>(HttpStatus.NO_CONTENT);
+			else
+				return new ResponseEntity<List<Booking>>(bookings, HttpStatus.OK);
+
+		} catch (DataNotFoundException e) {
+            return ResponseEntity.notFound().build();
+		}catch (Exception e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
 	
 	@PostMapping("/bookings")
-	private ResponseEntity<Booking> addBooking(@RequestBody Booking booking) {
+	private ResponseEntity<?> addBooking(@RequestBody Booking booking) {
 		try {
 			System.out.println("hello");
-			Booking booking1 = bookingService.addBooking(booking);
-			return new ResponseEntity<Booking>(booking1, HttpStatus.CREATED);
+			ResponseEntity<Booking> booking1 = (ResponseEntity<Booking>) bookingService.addBooking(booking);
+			if(booking1.getStatusCode().is2xxSuccessful()) {
+				Booking newBooking = booking1.getBody();
+				return new ResponseEntity<Booking>(newBooking,HttpStatus.CREATED);
+			}
+			else {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+		
 
 		} catch (Exception e) {
-			System.out.println("hello2");
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
 	
