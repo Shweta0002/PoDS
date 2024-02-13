@@ -10,7 +10,7 @@ import com.microservice.booking.entities.Booking;
 @Service
 public interface BookingService {
 
-	boolean getBookingById(Long bookingId);
+	boolean getBookingById(Integer bookingId);
 
 	ResponseEntity<?> addBooking(Booking booking);
 
@@ -20,7 +20,7 @@ public interface BookingService {
 
 	List<Booking> getAllBookings();
 
-	ResponseEntity<?> deleteBookingofUserByShowId(Integer user_id, Long show_id);
+	ResponseEntity<?> deleteBookingofUserByShowId(Integer user_id, Integer show_id);
 
 	ResponseEntity<?> deleteAllUserBookings(Integer user_id);
 

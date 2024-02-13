@@ -5,26 +5,17 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.microservice.booking.entities.Show;
 
-public interface ShowRepository extends JpaRepository<Show, Long> {
+@Repository
+public interface ShowRepository extends JpaRepository<Show, Integer> {
 
-	@Query(value = "SELECT * FROM shows s WHERE s.theatre_id =:theatre_id",nativeQuery = true)
-	List<Show> findShowsByTheatreId(@Param("theatre_id") Long theatre_id);
-//	@Query("SELECT s FROM Show s JOIN s.theatre_id t WHERE t.id = :theatreId")
-//    List<Show> findShowsByTheatreId(@Param("theatre_id") Long theatre_id);
-//	
-	
-	@Query(value = "SELECT * FROM shows s WHERE s.show_id =:show_id",nativeQuery = true)
-	Show getbyShowId(@Param("show_id") Long show_id);
-	
-	
-//	
-//	Show findByShowId(Long show_id);
-//
-//
-//
-//	Show getShowById(Long show_id);
-	
+	@Query(value = "SELECT * FROM shows s WHERE s.theatre_id = :theatre_id", nativeQuery = true)
+	List<Show> findShowsByTheatreId(@Param("theatre_id") Integer theatre_id);
+
+	@Query(value = "SELECT * FROM shows s WHERE s.show_id = :show_id", nativeQuery = true)
+	Show getbyShowId(@Param("show_id") Integer show_id);
+
 }

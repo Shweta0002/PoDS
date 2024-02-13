@@ -1,7 +1,6 @@
 package com.microservice.booking.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,9 +14,8 @@ public interface ShowService {
 
 	ResponseEntity<?> addShow(Show show);
 
-	List<Show> getAllShowByTheatreId(Long theatre_id);
+	List<Show> getAllShowByTheatreId(Integer theatre_id);
 
-	Show getShowById(Long show_id);
+	Show getShowById(Integer show_id);
 
-	
 }

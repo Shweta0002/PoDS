@@ -41,7 +41,6 @@ public class BookingController {
 			String line = "";
 			BufferedReader br = new BufferedReader(new FileReader(
 					"Project 1\\booking\\src\\main\\java\\com\\microservice\\booking\\data\\theatres.csv"));
-			System.out.println();
 			int i = 0;
 			while ((line = br.readLine()) != null) // returns a Boolean value
 			{
@@ -58,16 +57,15 @@ public class BookingController {
 
 			br = new BufferedReader(
 					new FileReader("Project 1\\booking\\src\\main\\java\\com\\microservice\\booking\\data\\shows.csv"));
-			System.out.println();
 			i = 0;
 			while ((line = br.readLine()) != null) {
 				if (i != 0) {
 					String[] str = line.split(",");
 					Show s = new Show();
-					s.setTheatre_id(Long.parseLong(str[1]));
+					s.setTheatreId(Integer.parseInt(str[1]));
 					s.setTitle(str[2]);
-					s.setPrice(Long.parseLong(str[3]));
-					s.setSeats_available(Long.parseLong(str[4]));
+					s.setPrice(Integer.parseInt(str[3]));
+					s.setSeatsAvailable(Integer.parseInt(str[4]));
 					showService.addShow(s);
 				}
 				i++;
@@ -80,9 +78,9 @@ public class BookingController {
 	}
 
 	@DeleteMapping("/bookings/users/{user_id}/shows/{show_id}")
-	private ResponseEntity<?> deleteBookingofUserByShowId(@PathVariable Integer user_id, @PathVariable Long show_id) {
+	private ResponseEntity<?> deleteBookingofUserByShowId(@PathVariable Integer user_id,
+			@PathVariable Integer show_id) {
 		try {
-
 			return bookingService.deleteBookingofUserByShowId(user_id, show_id);
 		} catch (DataNotFoundException e) {
 			return ResponseEntity.notFound().build();
@@ -95,7 +93,6 @@ public class BookingController {
 	private ResponseEntity<?> deleteUserBookings(@PathVariable Integer user_id) {
 		try {
 			return bookingService.deleteAllUserBookings(user_id);
-
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -109,7 +106,6 @@ public class BookingController {
 				return new ResponseEntity<List<Booking>>(HttpStatus.NO_CONTENT);
 			else
 				return new ResponseEntity<List<Booking>>(bookings, HttpStatus.OK);
-
 		} catch (DataNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
@@ -125,7 +121,6 @@ public class BookingController {
 				return new ResponseEntity<List<Booking>>(HttpStatus.NO_CONTENT);
 			else
 				return new ResponseEntity<List<Booking>>(bookings, HttpStatus.OK);
-
 		} catch (DataNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
@@ -138,7 +133,6 @@ public class BookingController {
 		try {
 			System.out.println("hello");
 			return bookingService.addBooking(booking);
-
 		} catch (Exception e) {
 			System.out.println("Error here");
 			return ResponseEntity.badRequest().body(e.getMessage());
@@ -155,11 +149,10 @@ public class BookingController {
 	}
 
 	@GetMapping("/shows/{show_id}")
-	private ResponseEntity<?> getShow(@PathVariable Long show_id) {
+	private ResponseEntity<?> getShow(@PathVariable Integer show_id) {
 		try {
 			Show show = showService.getShowById(show_id);
 			return new ResponseEntity<Show>(show, HttpStatus.OK);
-
 		} catch (Exception e) {
 			if (e.getMessage().contains("No show found with Id :"))
 				return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -169,14 +162,13 @@ public class BookingController {
 	}
 
 	@GetMapping("shows/theatres/{theatre_id}")
-	private ResponseEntity<List<Show>> getAllShowByTheatreId(@PathVariable Long theatre_id) {
+	private ResponseEntity<List<Show>> getAllShowByTheatreId(@PathVariable Integer theatre_id) {
 		try {
 			List<Show> shows = showService.getAllShowByTheatreId(theatre_id);
 			if (shows.isEmpty())
 				return new ResponseEntity<List<Show>>(HttpStatus.NO_CONTENT);
 			else
 				return new ResponseEntity<List<Show>>(shows, HttpStatus.OK);
-
 		} catch (DataNotFoundException e) {
 			return ResponseEntity.notFound().build();
 		} catch (Exception e) {
@@ -192,7 +184,6 @@ public class BookingController {
 				return new ResponseEntity<List<Show>>(HttpStatus.NO_CONTENT);
 			else
 				return new ResponseEntity<List<Show>>(shows, HttpStatus.OK);
-
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -202,7 +193,6 @@ public class BookingController {
 	private ResponseEntity<?> addShow(@RequestBody Show show) {
 		try {
 			return showService.addShow(show);
-
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -216,7 +206,6 @@ public class BookingController {
 				return new ResponseEntity<List<Theatre>>(HttpStatus.NO_CONTENT);
 			else
 				return new ResponseEntity<List<Theatre>>(theatres, HttpStatus.OK);
-
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -227,7 +216,6 @@ public class BookingController {
 		try {
 			Theatre theatre1 = theatreService.addTheatre(theatre);
 			return new ResponseEntity<Theatre>(theatre1, HttpStatus.CREATED);
-
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}

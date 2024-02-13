@@ -1,33 +1,32 @@
 package com.microservice.booking.VO;
 
-
-
 public class Wallet {
-	 
-	    private Integer userId;
-	    private Integer balance;
 
-	    public Wallet() {
-	    }
+	private Integer user_id;
+	private Integer balance;
 
-	    public Wallet(Integer userId, Integer balance) {
-	        this.userId = userId;
-	        this.balance = balance;
-	    }
+	public Wallet() {
+	}
 
-	    public Integer getUserId() {
-	        return this.userId;
-	    }
+	public Wallet(Integer user_id, Integer balance) {
+		this.user_id = user_id;
+		this.balance = balance;
+	}
 
-	    public Integer getBalance() {
-	        return this.balance;
-	    }
+	public Integer getUserId() {
+		return this.user_id;
+	}
 
-		public void setUserId(Integer userId) {
-			this.userId = userId;
-		}
+	public Integer getBalance() {
+		return this.balance;
+	}
 
-		public void setBalance(Integer balance) {
-			this.balance = balance;
-		}
+	public void setUserId(Integer user_id) {
+		this.user_id = user_id;
+	}
+
+	public void setBalance(Integer balance) {
+		this.balance = balance;
+	}
+
 }

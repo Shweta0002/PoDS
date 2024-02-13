@@ -1,23 +1,17 @@
 package com.microservice.booking.VO;
 
-import jakarta.persistence.Column;
-
 public class Users {
 
+	private Integer id;
+	private String name;
+	private String email;
 
-	Integer userId;
-
-    String name;
-
-   
-    String email;
-
-	public Integer getUserId() {
-		return userId;
+	public Integer getId() {
+		return id;
 	}
 
-	public void setUserId(Integer userId) {
-		this.userId = userId;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public String getName() {
@@ -36,22 +30,20 @@ public class Users {
 		this.email = email;
 	}
 
-	public Users(Integer userId, String name, String email) {
+	public Users(Integer id, String name, String email) {
 		super();
-		this.userId = userId;
+		this.id = id;
 		this.name = name;
 		this.email = email;
 	}
 
 	public Users() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public String toString() {
-		return "Users [userId=" + userId + ", name=" + name + ", email=" + email + "]";
+		return "Users [id=" + id + ", name=" + name + ", email=" + email + "]";
 	}
-
 
 }

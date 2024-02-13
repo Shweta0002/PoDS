@@ -12,25 +12,36 @@ public class Booking {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long bookingId;
-
-	private Long show_id;
+	private Integer id;
+	private Integer show_id;
 	private Integer user_id;
-	private Long seats_booked;
+	private Integer seats_booked;
 
-	public Long getBookingId() {
-		return bookingId;
+	public Booking() {
+		super();
 	}
 
-	public void setBookingId(Long bookingId) {
-		this.bookingId = bookingId;
+	public Booking(Integer id, Integer show_id, Integer user_id, Integer seats_booked) {
+		super();
+		this.id = id;
+		this.show_id = show_id;
+		this.user_id = user_id;
+		this.seats_booked = seats_booked;
 	}
 
-	public Long getShow_id() {
+	public Integer getId() {
+		return id;
+	}
+
+	public void setBookingId(Integer id) {
+		this.id = id;
+	}
+
+	public Integer getShow_id() {
 		return show_id;
 	}
 
-	public void setShow_id(Long show_id) {
+	public void setShow_id(Integer show_id) {
 		this.show_id = show_id;
 	}
 
@@ -42,30 +53,18 @@ public class Booking {
 		this.user_id = user_id;
 	}
 
-	public Long getSeats_booked() {
+	public Integer getSeats_booked() {
 		return seats_booked;
 	}
 
-	public void setSeats_booked(Long seats_booked) {
-		this.seats_booked = seats_booked;
-	}
-
-	public Booking(Long bookingId, Long show_id, Integer user_id, Long seats_booked) {
-		super();
-		this.bookingId = bookingId;
-		this.show_id = show_id;
-		this.user_id = user_id;
+	public void setSeats_booked(Integer seats_booked) {
 		this.seats_booked = seats_booked;
 	}
 
 	@Override
 	public String toString() {
-		return "Booking [bookingId=" + bookingId + ", show_id=" + show_id + ", user_id=" + user_id + ", seats_booked="
+		return "Booking [id=" + id + ", show_id=" + show_id + ", user_id=" + user_id + ", seats_booked="
 				+ seats_booked + "]";
 	}
-
-	public Booking() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+	
 }

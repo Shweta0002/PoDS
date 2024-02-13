@@ -10,24 +10,17 @@ import com.microservice.booking.repository.TheatreRepository;
 
 @Service
 public class TheatreServiceImpl implements TheatreService {
-	
+
 	@Autowired
 	private TheatreRepository theatreRepo;
 
-	public TheatreServiceImpl() {
-		// TODO Auto-generated constructor stub
-	} 
-
-	
 	@Override
 	public List<Theatre> getAllTheatres() {
-		// TODO Auto-generated method stub
 		return theatreRepo.findAll();
 	}
 
 	@Override
 	public Theatre addTheatre(Theatre theatre) {
-		// TODO Auto-generated method stub
 		return theatreRepo.save(theatre);
 	}
 
