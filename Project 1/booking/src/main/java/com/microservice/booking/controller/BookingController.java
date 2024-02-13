@@ -62,10 +62,10 @@ public class BookingController {
 				if (i != 0) {
 					String[] str = line.split(",");
 					Show s = new Show();
-					s.setTheatreId(Integer.parseInt(str[1]));
+					s.setTheatre_id(Integer.parseInt(str[1]));
 					s.setTitle(str[2]);
 					s.setPrice(Integer.parseInt(str[3]));
-					s.setSeatsAvailable(Integer.parseInt(str[4]));
+					s.setSeats_available(Integer.parseInt(str[4]));
 					showService.addShow(s);
 				}
 				i++;

@@ -39,11 +39,11 @@ public class Show {
 		this.id = id;
 	}
 
-	public Integer getTheatreId() {
+	public Integer getTheatre_id() {
 		return this.theatre_id;
 	}
 
-	public void setTheatreId(Integer theatre_id) {
+	public void setTheatre_id(Integer theatre_id) {
 		this.theatre_id = theatre_id;
 	}
 
@@ -63,11 +63,11 @@ public class Show {
 		this.price = price;
 	}
 
-	public Integer getSeatsAvailable() {
+	public Integer getSeats_available() {
 		return this.seats_available;
 	}
 
-	public void setSeatsAvailable(Integer seats_available) {
+	public void setSeats_available(Integer seats_available) {
 		this.seats_available = seats_available;
 	}
 

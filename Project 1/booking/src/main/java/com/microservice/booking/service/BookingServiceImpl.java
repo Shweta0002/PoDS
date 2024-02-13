@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
 			return ResponseEntity.badRequest().body("Wallet not found");
 		}
 
-		if (show.getSeatsAvailable() < booking.getSeats_booked()) {
+		if (show.getSeats_available() < booking.getSeats_booked()) {
 			return ResponseEntity.badRequest().body("Seats not available");
 		}
 
@@ -87,7 +87,7 @@ public class BookingServiceImpl implements BookingService {
 		}
 
 		// Update the number of seats available for the show
-		show.setSeatsAvailable(show.getSeatsAvailable() - booking.getSeats_booked());
+		show.setSeats_available(show.getSeats_available() - booking.getSeats_booked());
 
 		// Save the changes
 		showRepo.save(show);
@@ -105,7 +105,7 @@ public class BookingServiceImpl implements BookingService {
 		// seat to be returned to available pool
 		for (Booking b : bookings) {
 			Show show = showRepo.getbyShowId(b.getShow_id());
-			show.setSeatsAvailable(show.getSeatsAvailable() + b.getSeats_booked());
+			show.setSeats_available(show.getSeats_available() + b.getSeats_booked());
 			showRepo.save(show);
 
 			// The amounts to make these bookings are returned to the user’s wallet.
@@ -147,7 +147,7 @@ public class BookingServiceImpl implements BookingService {
 				HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 				restTemplate.exchange(
 						"http://localhost:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity, Wallet.class);
-				show.setSeatsAvailable(show.getSeatsAvailable() + b.getSeats_booked());
+				show.setSeats_available(show.getSeats_available() + b.getSeats_booked());
 				bookingRepo.delete(b);
 				showRepo.save(show);
 				return ResponseEntity.ok("Booking deleted successfully");
@@ -167,7 +167,7 @@ public class BookingServiceImpl implements BookingService {
 		// seat to be returned to available pool
 		for (Booking b : userBookings) {
 			Show show = showRepo.getbyShowId(b.getShow_id());
-			show.setSeatsAvailable(show.getSeatsAvailable() + b.getSeats_booked());
+			show.setSeats_available(show.getSeats_available() + b.getSeats_booked());
 			showRepo.save(show);
 
 			// The amounts to make these userBookings are returned to the user’s wallet.
