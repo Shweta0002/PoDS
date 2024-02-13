@@ -12,10 +12,10 @@ import com.microservice.booking.entities.Show;
 @Repository
 public interface ShowRepository extends JpaRepository<Show, Integer> {
 
-	@Query(value = "SELECT * FROM shows s WHERE s.theatre_id = :theatre_id", nativeQuery = true)
+	@Query(value = "SELECT * FROM Shows s WHERE s.theatre_id = :theatre_id", nativeQuery = true)
 	List<Show> findShowsByTheatreId(@Param("theatre_id") Integer theatre_id);
 
-	@Query(value = "SELECT * FROM shows s WHERE s.show_id = :show_id", nativeQuery = true)
+	@Query(value = "SELECT * FROM Shows s WHERE s.id = :show_id", nativeQuery = true)
 	Show getbyShowId(@Param("show_id") Integer show_id);
 
 }

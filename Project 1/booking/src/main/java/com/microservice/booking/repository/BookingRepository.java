@@ -12,10 +12,10 @@ import com.microservice.booking.entities.Booking;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
-	@Query(value = "SELECT * FROM booking b WHERE b.user_id = :user_id", nativeQuery = true)
+	@Query(value = "SELECT * FROM booking b WHERE b.id = :user_id", nativeQuery = true)
 	List<Booking> findAllbyUserId(@Param("user_id") Integer user_id);
 
-	@Query(value = "SELECT * FROM booking b WHERE b.user_id = :user_id AND b.show_id = :show_id", nativeQuery = true)
+	@Query(value = "SELECT * FROM booking b WHERE b.id = :user_id AND b.show_id = :show_id", nativeQuery = true)
 	Booking findByUserIdShowId(@Param("user_id") Integer user_id, @Param("show_id") Integer show_id);
 
 }

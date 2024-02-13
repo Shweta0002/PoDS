@@ -47,13 +47,13 @@ public class BookingServiceImpl implements BookingService {
 			restTemplate.getForEntity("http://localhost:8080/users/" + User_id,
 					Users.class);
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("Wallet not found");
+			return ResponseEntity.badRequest().body("User not found");
 		}
 		try {
 			wallet = restTemplate.getForEntity("http://localhost:8082/wallets/" + User_id,
 					Wallet.class);
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("User not found");
+			return ResponseEntity.badRequest().body("Wallet not found");
 		}
 
 		if (show.getSeatsAvailable() < booking.getSeats_booked()) {
