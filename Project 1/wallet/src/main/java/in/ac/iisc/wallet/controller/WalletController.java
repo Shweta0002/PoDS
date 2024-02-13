@@ -15,13 +15,13 @@ public class WalletController {
     @Autowired
     private WalletRepository walletRepository;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserWallet(@PathVariable Integer userId) {
+    @GetMapping("/{user_id}")
+    public ResponseEntity<?> getUserWallet(@PathVariable Integer user_id) {
         try {
-            if (userId == null) {
+            if (user_id == null) {
                 return ResponseEntity.badRequest().body("Please provide the User ID !!");
             }
-            Wallet w = walletRepository.findByUserId(userId);
+            Wallet w = walletRepository.findByUserId(user_id);
 
             if (w != null) {
                 return new ResponseEntity<>(w, HttpStatus.OK);
@@ -34,17 +34,17 @@ public class WalletController {
         }
     }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<?> updateBalance(@PathVariable Integer userId, @RequestBody WalletTransaction transaction) {
+    @PutMapping("/{user_id}")
+    public ResponseEntity<?> updateBalance(@PathVariable Integer user_id, @RequestBody WalletTransaction transaction) {
         try {
-            Wallet w = walletRepository.findByUserId(userId);
+            Wallet w = walletRepository.findByUserId(user_id);
             Integer balance = (w == null) ? 0 : w.getBalance();
             String action = transaction.getAction();
             Integer amount = transaction.getAmount();
 
             if (action.equals("debit")) {
                 if (balance < amount) {
-                    walletRepository.save(new Wallet(userId, balance));
+                    walletRepository.save(new Wallet(user_id, balance));
                     return ResponseEntity.badRequest().body("Insufficient Balance !!");
                 } else {
                     balance -= amount;
@@ -53,7 +53,7 @@ public class WalletController {
                 balance += amount;
             }
 
-            Wallet updatedWallet = walletRepository.save(new Wallet(userId, balance));
+            Wallet updatedWallet = walletRepository.save(new Wallet(user_id, balance));
             return new ResponseEntity<>(updatedWallet, HttpStatus.OK);
         } catch (Exception e) {
             System.out.println("Error occurred during wallet update:" + e);
@@ -61,14 +61,14 @@ public class WalletController {
         }
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteWallet(@PathVariable Integer userId) {
+    @DeleteMapping("/{user_id}")
+    public ResponseEntity<?> deleteWallet(@PathVariable Integer user_id) {
         try {
-            Wallet w = walletRepository.findByUserId(userId);
+            Wallet w = walletRepository.findByUserId(user_id);
             if (w == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
-            walletRepository.deleteById(userId);
+            walletRepository.deleteById(user_id);
             return ResponseEntity.ok("Wallet successfully deleted !!");
         } catch (Exception e) {
             System.out.println("Error occurred during wallet delete: " + e);

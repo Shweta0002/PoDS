@@ -15,19 +15,19 @@ public class Users {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userIdGen")
 	@SequenceGenerator(name = "userIdGen", initialValue = 1, allocationSize = 1)
-	Integer userId;
+	Integer id;
 
 	String name;
 
 	@Column(unique = true)
 	String email;
 
-	public Integer getUserId() {
-		return userId;
+	public Integer getId() {
+		return id;
 	}
 
-	public void setUserId(Integer userId) {
-		this.userId = userId;
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
 	public String getName() {
@@ -46,15 +46,14 @@ public class Users {
 		this.email = email;
 	}
 
-	public Users(Integer userId, String name, String email) {
+	public Users(Integer id, String name, String email) {
 		super();
-		this.userId = userId;
+		this.id = id;
 		this.name = name;
 		this.email = email;
 	}
 
 	public Users() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 }

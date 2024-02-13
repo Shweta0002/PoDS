@@ -21,13 +21,13 @@ public class UsersController {
     @Autowired
     private RestTemplate restTemplate;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable Integer userId) {
+    @GetMapping("/{user_id}")
+    public ResponseEntity<?> getUser(@PathVariable Integer user_id) {
         try {
-            if (userId == null) {
+            if (user_id == null) {
                 return ResponseEntity.badRequest().body("Please provide the User ID !!");
             }
-            Users u = usersRepository.findByUserId(userId);
+            Users u = usersRepository.findByUserId(user_id);
 
             if (u != null) {
                 return ResponseEntity.ok(u);
@@ -44,33 +44,39 @@ public class UsersController {
     public ResponseEntity<?> addUser(@RequestBody Users user) {
         try {
             List<Users> existingUsers = usersRepository.findByEmail(user.getEmail());
-            System.out.println("user");
-            if (existingUsers.size() != 0) {
+            if (existingUsers == null || existingUsers.size() != 0) {
                 return ResponseEntity.badRequest()
                         .body("Email ID already exists. Please provide another email ID !!");
             }
 
             Users newUser = usersRepository.save(user);
-            return new ResponseEntity<>(newUser, HttpStatus.OK);
+            return new ResponseEntity<>(newUser, HttpStatus.CREATED);
         } catch (Exception e) {
             System.out.println("Error occurred during user add:" + e);
             return ResponseEntity.internalServerError().body("An error occurred while processing the request");
         }
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<?> deleteUser(@PathVariable Integer userId) {
+    @DeleteMapping("/{user_id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Integer user_id) {
         try {
-            // TODO: is this even required
-            Users u = usersRepository.findByUserId(userId);
+            Users u = usersRepository.findByUserId(user_id);
             if (u == null) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            // TODO: Delete Bookings for this userId
-            restTemplate.delete("http://localhost:8082/wallets/{userId}");
+            try {
+                restTemplate.delete("http://localhost:8081/bookings/users/{user_id}");
+            } catch (Exception e) {
+                System.out.println("Booking of this user didnot exist !!: " + e);
+            }
+            try {
+                restTemplate.delete("http://localhost:8082/wallets/{user_id}");
+            } catch (Exception e) {
+                System.out.println("Wallet of this user did not exist !!: " + e);
+            }
 
-            usersRepository.deleteById(userId);
+            usersRepository.deleteById(user_id);
             return ResponseEntity.ok("User successfully deleted !!");
         } catch (Exception e) {
             System.out.println("Error occurred during user delete: " + e);
@@ -81,7 +87,11 @@ public class UsersController {
     @DeleteMapping
     public ResponseEntity<?> deleteAllUsers() {
         try {
-            // TODO: Delete Bookings for all userId
+            try {
+                restTemplate.delete("http://localhost:8081/bookings");
+            } catch (Exception e) {
+                System.out.println("No bookings exist !!: " + e);
+            }
             restTemplate.delete("http://localhost:8082/wallets");
 
             usersRepository.deleteAll();
