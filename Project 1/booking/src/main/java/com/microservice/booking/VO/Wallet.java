@@ -13,7 +13,7 @@ public class Wallet {
 		this.balance = balance;
 	}
 
-	public Integer getUserId() {
+	public Integer getUser_id() {
 		return this.user_id;
 	}
 
@@ -21,7 +21,7 @@ public class Wallet {
 		return this.balance;
 	}
 
-	public void setUserId(Integer user_id) {
+	public void setUser_id(Integer user_id) {
 		this.user_id = user_id;
 	}
 
