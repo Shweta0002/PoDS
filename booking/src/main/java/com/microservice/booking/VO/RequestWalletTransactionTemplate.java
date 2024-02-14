@@ -1,5 +1,6 @@
 package com.microservice.booking.VO;
 
+// Class for Request payload of wallet transactions
 public class RequestWalletTransactionTemplate {
 	private String action;
 	private Integer amount;

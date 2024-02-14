@@ -27,6 +27,7 @@ public class ShowServiceImpl implements ShowService {
 
 	@Override
 	public ResponseEntity<?> addShow(Show show) {
+		// Ensure the theatre exists where show is going to be added
 		if (theatreRepo.getTheatreById(show.getTheatre_id()) != null) {
 			showRepo.save(show);
 			return new ResponseEntity<Show>(show, HttpStatus.OK);

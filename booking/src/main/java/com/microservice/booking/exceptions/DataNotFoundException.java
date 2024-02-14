@@ -1,5 +1,6 @@
 package com.microservice.booking.exceptions;
 
+// For handling exceptions
 public class DataNotFoundException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 

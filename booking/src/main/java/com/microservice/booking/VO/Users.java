@@ -1,5 +1,6 @@
 package com.microservice.booking.VO;
 
+// Class for response recieved from users microservice
 public class Users {
 
 	private Integer id;
@@ -7,7 +8,7 @@ public class Users {
 	private String email;
 
 	public Integer getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(Integer id) {
@@ -15,7 +16,7 @@ public class Users {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
@@ -23,7 +24,7 @@ public class Users {
 	}
 
 	public String getEmail() {
-		return email;
+		return this.email;
 	}
 
 	public void setEmail(String email) {
@@ -45,5 +46,4 @@ public class Users {
 	public String toString() {
 		return "Users [id=" + id + ", name=" + name + ", email=" + email + "]";
 	}
-
 }

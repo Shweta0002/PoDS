@@ -36,7 +36,7 @@ public class Theatre {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
@@ -44,11 +44,11 @@ public class Theatre {
 	}
 
 	public String getLocation() {
-		return location;
+		return this.location;
 	}
 
 	public void setLocation(String location) {
 		this.location = location;
 	}
-	
+
 }

@@ -1,6 +1,6 @@
 package in.ac.iisc.wallet.model;
 
-// Java class for Request payload
+// Class for Request payload
 public class WalletTransaction {
     String action;
     Integer amount;

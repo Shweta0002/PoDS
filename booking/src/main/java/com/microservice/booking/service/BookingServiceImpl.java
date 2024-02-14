@@ -49,13 +49,11 @@ public class BookingServiceImpl implements BookingService {
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body("User not found");
 		}
-		
 
 		if (show.getSeats_available() < booking.getSeats_booked()) {
 			return ResponseEntity.badRequest().body("Seats not available");
 		}
 
-		
 		try {
 			// Deduct the amount from the users wallet
 			HttpHeaders headers = new HttpHeaders();
@@ -65,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
 			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 			wallet = restTemplate.exchange(
 					"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
-			
+
 			if (wallet.getBody().getBalance() < totalCost) {
 				return ResponseEntity.badRequest().body("Insufficient Balance");
 			}
@@ -73,7 +71,6 @@ public class BookingServiceImpl implements BookingService {
 			return ResponseEntity.badRequest().body("Insufficient Balance");
 		}
 
-		
 		Booking bookingOfUserWithSameShow_id = bookingRepo.findByUserIdShowId(User_id, show_id);
 		Booking newBooking;
 		if (bookingOfUserWithSameShow_id != null) {

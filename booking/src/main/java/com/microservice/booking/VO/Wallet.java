@@ -1,5 +1,6 @@
 package com.microservice.booking.VO;
 
+// Class for response recieved from wallet microservice
 public class Wallet {
 
 	private Integer user_id;

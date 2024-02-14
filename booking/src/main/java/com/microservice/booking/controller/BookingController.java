@@ -35,6 +35,7 @@ public class BookingController {
 	@Autowired
 	private BookingService bookingService;
 
+	// Initialization of "theatre" and "show" tables
 	@PostConstruct
 	public void init() {
 		try {
@@ -73,7 +74,8 @@ public class BookingController {
 			br.close();
 
 		} catch (Exception e) {
-
+			// Log the exception for debugging
+			System.out.println("Error occurred during theatre and show initialization:" + e);
 		}
 	}
 
@@ -131,10 +133,8 @@ public class BookingController {
 	@PostMapping("/bookings")
 	private ResponseEntity<?> addBooking(@RequestBody Booking booking) {
 		try {
-			System.out.println("hello");
 			return bookingService.addBooking(booking);
 		} catch (Exception e) {
-			System.out.println("Error here");
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
