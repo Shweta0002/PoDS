@@ -30,7 +30,7 @@ public class Booking {
 	}
 
 	public Integer getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setBookingId(Integer id) {
@@ -38,7 +38,7 @@ public class Booking {
 	}
 
 	public Integer getShow_id() {
-		return show_id;
+		return this.show_id;
 	}
 
 	public void setShow_id(Integer show_id) {
@@ -46,7 +46,7 @@ public class Booking {
 	}
 
 	public Integer getUser_id() {
-		return user_id;
+		return this.user_id;
 	}
 
 	public void setUser_id(Integer user_id) {
@@ -54,7 +54,7 @@ public class Booking {
 	}
 
 	public Integer getSeats_booked() {
-		return seats_booked;
+		return this.seats_booked;
 	}
 
 	public void setSeats_booked(Integer seats_booked) {
@@ -66,5 +66,5 @@ public class Booking {
 		return "Booking [id=" + id + ", show_id=" + show_id + ", user_id=" + user_id + ", seats_booked="
 				+ seats_booked + "]";
 	}
-	
+
 }

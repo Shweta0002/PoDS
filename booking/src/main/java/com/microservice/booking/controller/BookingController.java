@@ -39,8 +39,8 @@ public class BookingController {
 	public void init() {
 		try {
 			String line = "";
-			BufferedReader br = new BufferedReader(new FileReader(
-					"Project 1\\booking\\src\\main\\java\\com\\microservice\\booking\\data\\theatres.csv"));
+			BufferedReader br = new BufferedReader(
+					new FileReader("booking\\src\\main\\java\\com\\microservice\\booking\\data\\theatres.csv"));
 			int i = 0;
 			while ((line = br.readLine()) != null) // returns a Boolean value
 			{
@@ -56,7 +56,7 @@ public class BookingController {
 			br.close();
 
 			br = new BufferedReader(
-					new FileReader("Project 1\\booking\\src\\main\\java\\com\\microservice\\booking\\data\\shows.csv"));
+					new FileReader("booking\\src\\main\\java\\com\\microservice\\booking\\data\\shows.csv"));
 			i = 0;
 			while ((line = br.readLine()) != null) {
 				if (i != 0) {
