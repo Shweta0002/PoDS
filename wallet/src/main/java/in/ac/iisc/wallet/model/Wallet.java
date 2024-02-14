@@ -1,11 +1,13 @@
 package in.ac.iisc.wallet.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
 public class Wallet {
     @Id
+    @Column(nullable = false)
     private Integer user_id;
     private Integer balance;
 

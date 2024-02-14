@@ -15,6 +15,7 @@ public class Users {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userIdGen")
 	@SequenceGenerator(name = "userIdGen", initialValue = 1, allocationSize = 1)
+	@Column(nullable = false)
 	Integer id;
 
 	String name;
@@ -23,7 +24,7 @@ public class Users {
 	String email;
 
 	public Integer getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(Integer id) {
@@ -31,7 +32,7 @@ public class Users {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
@@ -39,7 +40,7 @@ public class Users {
 	}
 
 	public String getEmail() {
-		return email;
+		return this.email;
 	}
 
 	public void setEmail(String email) {
