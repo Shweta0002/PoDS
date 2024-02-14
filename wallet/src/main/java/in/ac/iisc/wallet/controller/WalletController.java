@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+
+import in.ac.iisc.wallet.VO.Users;
 import in.ac.iisc.wallet.model.Wallet;
 import in.ac.iisc.wallet.model.WalletTransaction;
 import in.ac.iisc.wallet.repository.WalletRepository;
@@ -14,6 +17,9 @@ public class WalletController {
 
     @Autowired
     private WalletRepository walletRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @GetMapping("/{user_id}")
     public ResponseEntity<?> getUserWallet(@PathVariable Integer user_id) {
@@ -42,6 +48,13 @@ public class WalletController {
     @PutMapping("/{user_id}")
     public ResponseEntity<?> updateBalance(@PathVariable Integer user_id, @RequestBody WalletTransaction transaction) {
         try {
+            try {
+                restTemplate.getForEntity("http://localhost:8080/users/" + user_id,
+                        Users.class);
+            } catch (Exception e) {
+                return ResponseEntity.badRequest().body("User doesnot exist !!");
+            }
+
             Wallet w = walletRepository.findByUserId(user_id);
 
             // If user wallet doesnot exists, initialize balance to 0
