@@ -8,7 +8,7 @@ import in.ac.iisc.wallet.model.Wallet;
 
 @Repository
 public interface WalletRepository extends JpaRepository<Wallet, Integer> {
-    
+
     @Query(value = "SELECT * FROM Wallet w WHERE w.user_id = :user_id", nativeQuery = true)
     Wallet findByUserId(Integer user_id);
 
