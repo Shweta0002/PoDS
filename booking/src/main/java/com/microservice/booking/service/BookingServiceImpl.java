@@ -38,11 +38,14 @@ public class BookingServiceImpl implements BookingService {
 		Integer User_id = booking.getUser_id();
 		Show show = showRepo.getbyShowId(show_id);
 
+		// Ensure the show exists where booking is to be added
 		if (show == null) {
 			return ResponseEntity.badRequest().body("Show not found");
 		}
 
 		ResponseEntity<Wallet> wallet = null;
+
+		// Ensure the user exists for whom booking is to be added
 		try {
 			restTemplate.getForEntity("http://localhost:8080/users/" + User_id,
 					Users.class);
@@ -50,6 +53,8 @@ public class BookingServiceImpl implements BookingService {
 			return ResponseEntity.badRequest().body("User not found");
 		}
 
+		// Ensure the available seats for the show is greater or equal to number of
+		// seats to be booked
 		if (show.getSeats_available() < booking.getSeats_booked()) {
 			return ResponseEntity.badRequest().body("Seats not available");
 		}
@@ -64,6 +69,7 @@ public class BookingServiceImpl implements BookingService {
 			wallet = restTemplate.exchange(
 					"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
 
+			// Ensure user has sufficient balance for completing booking
 			if (wallet.getBody().getBalance() < totalCost) {
 				return ResponseEntity.badRequest().body("Insufficient Balance");
 			}
@@ -97,6 +103,7 @@ public class BookingServiceImpl implements BookingService {
 	public ResponseEntity<?> deleteAllBooking() {
 		List<Booking> bookings = getAllBookings();
 
+		// If no bookings exist
 		if (bookings == null || bookings.size() == 0) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -138,6 +145,7 @@ public class BookingServiceImpl implements BookingService {
 			if (b.getShow_id() == show_id) {
 				Show show = showRepo.getbyShowId(show_id);
 				Integer totalCost = (int) (show.getPrice() * b.getSeats_booked());
+
 				// creating response entity to update wallet
 				HttpHeaders headers = new HttpHeaders();
 				// set all headers
