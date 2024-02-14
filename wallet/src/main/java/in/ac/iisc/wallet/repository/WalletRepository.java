@@ -18,5 +18,5 @@ public interface WalletRepository extends JpaRepository<Wallet, Integer> {
     @Transactional
     @Modifying
     @Query(value = "DELETE FROM Wallet w WHERE w.user_id = :user_id", nativeQuery = true)
-    void deleteById(@Param("user_id") Integer user_id);
+    void deleteByUserId(@Param("user_id") Integer user_id);
 }

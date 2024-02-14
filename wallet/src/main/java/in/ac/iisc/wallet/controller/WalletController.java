@@ -98,7 +98,7 @@ public class WalletController {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
-            walletRepository.deleteById(user_id);
+            walletRepository.deleteByUserId(user_id);
             return ResponseEntity.ok("Wallet successfully deleted !!");
         } catch (Exception e) {
             // Log the exception for debugging
