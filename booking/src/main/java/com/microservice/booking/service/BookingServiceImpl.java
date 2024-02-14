@@ -49,29 +49,31 @@ public class BookingServiceImpl implements BookingService {
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body("User not found");
 		}
-		try {
-			wallet = restTemplate.getForEntity("http://localhost:8082/wallets/" + User_id,
-					Wallet.class);
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("Wallet not found");
-		}
+		
 
 		if (show.getSeats_available() < booking.getSeats_booked()) {
 			return ResponseEntity.badRequest().body("Seats not available");
 		}
 
-		Integer totalCost = (int) (show.getPrice() * booking.getSeats_booked());
-		if (wallet.getBody().getBalance() < totalCost) {
+		
+		try {
+			// Deduct the amount from the users wallet
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			Integer totalCost = (int) (show.getPrice() * booking.getSeats_booked());
+			RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("debit", totalCost);
+			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
+			wallet = restTemplate.exchange(
+					"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
+			
+			if (wallet.getBody().getBalance() < totalCost) {
+				return ResponseEntity.badRequest().body("Insufficient Balance");
+			}
+		} catch (Exception e) {
 			return ResponseEntity.badRequest().body("Insufficient Balance");
 		}
 
-		// Deduct the amount from the users wallet
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("debit", totalCost);
-		HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
-		restTemplate.exchange(
-				"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
+		
 		Booking bookingOfUserWithSameShow_id = bookingRepo.findByUserIdShowId(User_id, show_id);
 		Booking newBooking;
 		if (bookingOfUserWithSameShow_id != null) {
