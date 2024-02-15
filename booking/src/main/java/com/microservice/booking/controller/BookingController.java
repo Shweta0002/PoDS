@@ -39,43 +39,63 @@ public class BookingController {
 	@PostConstruct
 	public void init() {
 		try {
-			String line = "";
-			BufferedReader br = new BufferedReader(
-					new FileReader("booking\\src\\main\\java\\com\\microservice\\booking\\data\\theatres.csv"));
-			int i = 0;
-			while ((line = br.readLine()) != null) // returns a Boolean value
-			{
-				if (i != 0) {
-					String[] str = line.split(","); // use comma as separator
-					Theatre t = new Theatre();
-					t.setName(str[1]);
-					t.setLocation(str[2]);
-					theatreService.addTheatre(t);
-				}
-				i++;
-			}
-			br.close();
+			String theatres[] = { "1,Helen Hayes Theater,240 W 44th St.",
+					"2,Cherry Lane Theatre,38 Commerce Street",
+					"3,New World Stages,340 West 50th Street",
+					"4,The Zipper Theater,100 E 17th St",
+					"5,Queens Theatre,Meadows Corona Park",
+					"6,The Public Theater,425 Lafayette St",
+					"7,Manhattan Ensemble Theatre,55 Mercer St.",
+					"8,Metropolitan Playhouse,220 E 4th St.",
+					"9,Acorn Theater,410 West 42nd Street",
+					"10,Apollo Theater,253 West 125th Street" };
+			for (String line : theatres) {
+				String[] str = line.split(","); // use comma as separator
+				Theatre t = new Theatre();
+				t.setName(str[1]);
+				t.setLocation(str[2]);
+				theatreService.addTheatre(t);
 
-			br = new BufferedReader(
-					new FileReader("booking\\src\\main\\java\\com\\microservice\\booking\\data\\shows.csv"));
-			i = 0;
-			while ((line = br.readLine()) != null) {
-				if (i != 0) {
-					String[] str = line.split(",");
-					Show s = new Show();
-					s.setTheatre_id(Integer.parseInt(str[1]));
-					s.setTitle(str[2]);
-					s.setPrice(Integer.parseInt(str[3]));
-					s.setSeats_available(Integer.parseInt(str[4]));
-					showService.addShow(s);
-				}
-				i++;
 			}
-			br.close();
+		} catch (Exception e) {
+			// Log the exception for debugging
+			System.out.println("Error occurred during theatre initialization:" + e);
+		}
+		try {
+			String shows[] = { "1,1,Youth in Revolt,50,40",
+					"2,1,Leap Year,55,30",
+					"3,1,Remember Me,60,55",
+					"4,2,Fireproof,65,65",
+					"5,2,Beginners,55,50",
+					"6,3,Music and Lyrics,75,40",
+					"7,3,The Back-up Plan,65,60",
+					"8,4,WALL-E,45,55",
+					"9,4,Water For Elephants,50,45",
+					"10,5,What Happens in Vegas,65,65",
+					"11,6,Tangled,55,40",
+					"12,6,The Curious Case of Benjamin Button,65,50",
+					"13,7,Rachel Getting Married,40,60",
+					"14,7,New Year's Eve,35,45",
+					"15,7,The Proposal,45,55",
+					"16,8,The Time Traveler's Wife,75,65",
+					"17,8,The Invention of Lying,50,40",
+					"18,9,The Heartbreak Kid,60,50",
+					"19,10,The Duchess,70,60",
+					"20,10,Mamma Mia!,40,45" };
+			for (String line : shows) {
+				String[] str = line.split(",");
+				Show s = new Show();
+				s.setTheatre_id(Integer.parseInt(str[1]));
+				s.setTitle(str[2]);
+				s.setPrice(Integer.parseInt(str[3]));
+				s.setSeats_available(Integer.parseInt(str[4]));
+				showService.addShow(s);
+
+			}
 
 		} catch (Exception e) {
 			// Log the exception for debugging
-			System.out.println("Error occurred during theatre and show initialization:" + e);
+			System.out.println("Error occurred during show initialization:" + e);
 		}
 	}
 

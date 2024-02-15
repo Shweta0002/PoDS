@@ -1,27 +1,16 @@
-# Use a Linux-based base image with OpenJDK and Maven installed
-FROM maven:3.8-openjdk-17 AS build
-
-# Set working directory
-WORKDIR /app
-
-# Copy the Maven project files
-COPY pom.xml .
-COPY src ./src
-
-# Build the application
-RUN mvn clean package
-
-# Start with a fresh base image
-FROM openjdk:17-jdk-slim
+# Use an official OpenJDK runtime as a parent image
+FROM openjdk:17
 
 # Set the working directory to /app
-WORKDIR /app
+WORKDIR /wallet
 
-# Copy the JAR file from the build stage to the /app directory in the new image
-COPY --from=build /app/target/*.jar app.jar
+# Copy the current directory contents into the container at /wallet
+COPY . .
 
-# Expose the port
-EXPOSE 8082
+# Install Maven
+RUN microdnf install -y maven
 
-# Command to run the application
-CMD ["java", "-jar", "app.jar"]
+# Build the projects with Maven
+RUN mvn clean install
+
+ENTRYPOINT ["java" ,"-jar","target/wallet-0.0.1-SNAPSHOT.jar"]
