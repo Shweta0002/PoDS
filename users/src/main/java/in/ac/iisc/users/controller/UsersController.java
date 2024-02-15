@@ -82,14 +82,14 @@ public class UsersController {
 
             // Deleting all bookings of user using users microservice
             try {
-                restTemplate.delete("http://localhost:8081/bookings/users/" + user_id);
+                restTemplate.delete("http://host.docker.internal:8081/bookings/users/" + user_id);
             } catch (Exception e) {
                 System.out.println("Booking of this user didnot exist !!: " + e);
             }
 
             // Deleting user wallet from wallets service
             try {
-                restTemplate.delete("http://localhost:8082/wallets/" + user_id);
+                restTemplate.delete("http://host.docker.internal:8082/wallets/" + user_id);
             } catch (Exception e) {
                 System.out.println("Wallet of this user did not exist !!: " + e);
             }
@@ -110,13 +110,13 @@ public class UsersController {
         try {
             // Deleting all bookings of all users
             try {
-                restTemplate.delete("http://localhost:8081/bookings");
+                restTemplate.delete("http://host.docker.internal:8081/bookings");
             } catch (Exception e) {
                 System.out.println("No bookings exist !!: " + e);
             }
 
             // Deleting all user wallets
-            restTemplate.delete("http://localhost:8082/wallets");
+            restTemplate.delete("http://host.docker.internal:8082/wallets");
 
             usersRepository.deleteAll();
             return ResponseEntity.ok("All users successfully deleted !!");

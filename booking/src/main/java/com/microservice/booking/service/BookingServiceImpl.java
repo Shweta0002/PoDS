@@ -47,13 +47,13 @@ public class BookingServiceImpl implements BookingService {
 
 		// Ensure the user exists for whom booking is to be added
 		try {
-			restTemplate.getForEntity("http://localhost:8080/users/" + User_id,
+			restTemplate.getForEntity("http://host.docker.internal:8080/users/" + User_id,
 					Users.class);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body("User not found");
 		}
 		try {
-			wallet = restTemplate.getForEntity("http://localhost:8082/wallets/" + User_id,
+			wallet = restTemplate.getForEntity("http://host.docker.internal:8082/wallets/" + User_id,
 					Wallet.class);
 		} catch (Exception e) {
 			// Initializing new user wallet with balance 0
@@ -62,7 +62,7 @@ public class BookingServiceImpl implements BookingService {
 			RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", 0);
 			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 			restTemplate.exchange(
-					"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
+					"http://host.docker.internal:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
 
 			return ResponseEntity.badRequest().body("Insufficient Balance");
 
@@ -86,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
 		RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("debit", totalCost);
 		HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 		restTemplate.exchange(
-				"http://localhost:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
+				"hhttp://host.docker.internal:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
 		Booking bookingOfUserWithSameShow_id = bookingRepo.findByUserIdShowId(User_id, show_id);
 		Booking newBooking;
 		if (bookingOfUserWithSameShow_id != null) {
@@ -131,7 +131,8 @@ public class BookingServiceImpl implements BookingService {
 			RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", totalCost);
 			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 			restTemplate.exchange(
-					"http://localhost:8082/wallets/" + b.getUser_id(), HttpMethod.PUT, requestEntity, Wallet.class);
+					"http://host.docker.internal:8082/wallets/" + b.getUser_id(), HttpMethod.PUT, requestEntity,
+					Wallet.class);
 
 			bookingRepo.delete(b);
 		}
@@ -163,7 +164,8 @@ public class BookingServiceImpl implements BookingService {
 				RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", totalCost);
 				HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 				restTemplate.exchange(
-						"http://localhost:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity, Wallet.class);
+						"hhttp://host.docker.internal:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity,
+						Wallet.class);
 				show.setSeats_available(show.getSeats_available() + b.getSeats_booked());
 				bookingRepo.delete(b);
 				showRepo.save(show);
@@ -194,7 +196,7 @@ public class BookingServiceImpl implements BookingService {
 			RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", totalCost);
 			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 			restTemplate.exchange(
-					"http://localhost:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity, Wallet.class);
+					"http://host.docker.internal:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity, Wallet.class);
 
 			bookingRepo.delete(b);
 		}
