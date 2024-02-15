@@ -86,7 +86,7 @@ public class BookingServiceImpl implements BookingService {
 		RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("debit", totalCost);
 		HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 		restTemplate.exchange(
-				"hhttp://host.docker.internal:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
+				"http://host.docker.internal:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
 		Booking bookingOfUserWithSameShow_id = bookingRepo.findByUserIdShowId(User_id, show_id);
 		Booking newBooking;
 		if (bookingOfUserWithSameShow_id != null) {
@@ -164,7 +164,7 @@ public class BookingServiceImpl implements BookingService {
 				RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", totalCost);
 				HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 				restTemplate.exchange(
-						"hhttp://host.docker.internal:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity,
+						"http://host.docker.internal:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity,
 						Wallet.class);
 				show.setSeats_available(show.getSeats_available() + b.getSeats_booked());
 				bookingRepo.delete(b);
