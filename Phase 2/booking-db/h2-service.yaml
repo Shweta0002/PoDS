@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: h2-database
+spec:
+  selector:
+    app: h2-database
+  ports:
+    - protocol: TCP
+      port: 1521

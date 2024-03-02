@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: h2-database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: h2-database
+  template:
+    metadata:
+      labels:
+        app: h2-database
+    spec:
+      containers:
+      - name: h2
+        image: bhavya-choudhary/db
+        ports:
+        - containerPort: 1521

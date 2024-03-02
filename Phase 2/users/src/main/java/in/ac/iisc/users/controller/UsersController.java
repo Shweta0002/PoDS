@@ -7,10 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import jakarta.transaction.Transactional;
 
 import in.ac.iisc.users.model.Users;
 import in.ac.iisc.users.repository.UsersRepository;
 
+@Transactional
 @RestController
 @RequestMapping("/users")
 public class UsersController {
@@ -82,14 +84,14 @@ public class UsersController {
 
             // Deleting all bookings of user using users microservice
             try {
-                restTemplate.delete("http://host.docker.internal:8081/bookings/users/" + user_id);
+                restTemplate.delete("http://booking-microservice:8081/bookings/users/" + user_id);
             } catch (Exception e) {
                 System.out.println("Booking of this user didnot exist !!: " + e);
             }
 
             // Deleting user wallet from wallets service
             try {
-                restTemplate.delete("http://host.docker.internal:8082/wallets/" + user_id);
+                restTemplate.delete("http://wallet-microservice:8082/wallets/" + user_id);
             } catch (Exception e) {
                 System.out.println("Wallet of this user did not exist !!: " + e);
             }
@@ -110,13 +112,13 @@ public class UsersController {
         try {
             // Deleting all bookings of all users
             try {
-                restTemplate.delete("http://host.docker.internal:8081/bookings");
+                restTemplate.delete("http://booking-microservice:8081/bookings");
             } catch (Exception e) {
                 System.out.println("No bookings exist !!: " + e);
             }
 
             // Deleting all user wallets
-            restTemplate.delete("http://host.docker.internal:8082/wallets");
+            restTemplate.delete("http://wallet-microservice:8082/wallets");
 
             usersRepository.deleteAll();
             return ResponseEntity.ok("All users successfully deleted !!");
