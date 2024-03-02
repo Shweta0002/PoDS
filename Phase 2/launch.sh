@@ -17,7 +17,8 @@ kubectl apply -f ./booking/booking-service.yaml
 kubectl apply -f ./users/users-service.yaml
 kubectl apply -f ./wallet/wallet-service.yaml
 
-kubectl port-forward service/booking 8081:8081
-kubectl port-forward service/users 8080:8080
-kubectl port-forward service/wallet 8082:8082
+sleep 2m
+kubectl port-forward service/booking 8081:8081 & 
+kubectl port-forward service/users 8080:8080 &
+kubectl port-forward service/wallet 8082:8082 &
 
