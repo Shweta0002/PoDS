@@ -20,6 +20,7 @@ import com.microservice.booking.repository.ShowRepository;
 @Service
 public class BookingServiceImpl implements BookingService {
 
+
 	@Autowired
 	private BookingRepository bookingRepo;
 
@@ -49,13 +50,13 @@ public class BookingServiceImpl implements BookingService {
 
 		// Ensure the user exists for whom booking is to be added
 		try {
-			restTemplate.getForEntity("http://users-microservice:8080/users/" + User_id,
+			restTemplate.getForEntity("http://users:8080/users/" + User_id,
 					Users.class);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body("User not found");
 		}
 		try {
-			wallet = restTemplate.getForEntity("http://wallet-microservice:8082/wallets/" + User_id,
+			wallet = restTemplate.getForEntity("http://wallet:8082/wallets/" + User_id,
 					Wallet.class);
 		} catch (Exception e) {
 			// Initializing new user wallet with balance 0
@@ -64,7 +65,7 @@ public class BookingServiceImpl implements BookingService {
 			RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", 0);
 			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 			restTemplate.exchange(
-					"http://wallet-microservice:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
+					"http://wallet:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
 
 			return ResponseEntity.badRequest().body("Insufficient Balance");
 
@@ -88,7 +89,7 @@ public class BookingServiceImpl implements BookingService {
 		RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("debit", totalCost);
 		HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 		restTemplate.exchange(
-				"http://wallet-microservice:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
+				"http://wallet:8082/wallets/" + User_id, HttpMethod.PUT, requestEntity, Wallet.class);
 		Booking bookingOfUserWithSameShow_id = bookingRepo.findByUserIdShowId(User_id, show_id);
 		Booking newBooking;
 		if (bookingOfUserWithSameShow_id != null) {
@@ -133,7 +134,7 @@ public class BookingServiceImpl implements BookingService {
 			RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", totalCost);
 			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 			restTemplate.exchange(
-					"http://wallet-microservice:8082/wallets/" + b.getUser_id(), HttpMethod.PUT, requestEntity,
+					"http://wallet:8082/wallets/" + b.getUser_id(), HttpMethod.PUT, requestEntity,
 					Wallet.class);
 
 			bookingRepo.delete(b);
@@ -166,7 +167,7 @@ public class BookingServiceImpl implements BookingService {
 				RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", totalCost);
 				HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 				restTemplate.exchange(
-						"http://wallet-microservice:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity,
+						"http://wallet:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity,
 						Wallet.class);
 				show.setSeats_available(show.getSeats_available() + b.getSeats_booked());
 				bookingRepo.delete(b);
@@ -198,7 +199,7 @@ public class BookingServiceImpl implements BookingService {
 			RequestWalletTransactionTemplate data = new RequestWalletTransactionTemplate("credit", totalCost);
 			HttpEntity<?> requestEntity = new HttpEntity<Object>(data, headers);
 			restTemplate.exchange(
-					"http://wallet-microservice:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity, Wallet.class);
+					"http://wallet:8082/wallets/" + user_id, HttpMethod.PUT, requestEntity, Wallet.class);
 
 			bookingRepo.delete(b);
 		}

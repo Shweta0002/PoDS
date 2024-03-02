@@ -1,12 +1,9 @@
-FROM openjdk:8-jre-alpine
+FROM eclipse-temurin
+# Port to expose for web console
+# EXPOSE 9081
+# Port to expose for tcp connections
+# EXPOSE 9082
 
-ENV H2_VERSION=1.4.200
+COPY h2-2.1.210.jar h2.jar
+CMD  java -cp h2.jar org.h2.tools.Server -web -webDaemon -webAllowOthers -webPort 9081 -tcp -tcpAllowOthers -tcpPort 9082 -ifNotExists
 
-# Download and extract H2 database
-RUN wget -O h2.zip http://www.h2database.com/h2-$H2_VERSION.zip && \
-    unzip h2.zip -d /opt/h2 && \
-    rm h2.zip
-
-EXPOSE 1521
-
-CMD ["java", "-cp", "/opt/h2/bin/h2*.jar", "org.h2.tools.Server", "-ifNotExists"]

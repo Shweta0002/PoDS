@@ -1,20 +1,23 @@
 minikube --driver=docker start
-
-minikube start
-
 eval $(minikube docker-env)
 
-docker build -t bhavya-choudhary/booking -f booking/Dockerfile .
-docker build -t bhavya-choudhary/users -f users/Dockerfile .
-docker build -t bhavya-choudhary/wallet -f wallet/Dockerfile .
-docker build -t bhavya-choudhary/db -f booking-db/Dockerfile .
+docker build -t h2db ./booking-db
+kubectl apply -f ./booking-db/h2db-deployment.yaml
+kubectl apply -f ./booking-db/h2db-service.yaml
 
-minikube kubectl -- create deployment db-microservice --image=bhavya-choudhary/db
-minikube kubectl -- create deployment booking-microservice --image=bhavya-choudhary/booking
-minikube kubectl -- create deployment users-microservice --image=bhavya-choudhary/users
-minikube kubectl -- create deployment wallet-microservice --image=bhavya-choudhary/wallet
+docker build -t booking ./booking
+docker build -t users ./users
+docker build -t wallet ./wallet
 
-minikube kubectl -- expose deployment db-microservice --type=LoadBalancer --port=1521
-minikube kubectl -- expose deployment booking-microservice --type=LoadBalancer --port=8081
-minikube kubectl -- expose deployment users-microservice --type=LoadBalancer --port=8080
-minikube kubectl -- expose deployment wallet-microservice --type=LoadBalancer --port=8082
+kubectl apply -f ./booking/booking-deployment.yaml
+kubectl apply -f ./users/users-deployment.yaml
+kubectl apply -f ./wallet/wallet-deployment.yaml
+
+kubectl apply -f ./booking/booking-service.yaml
+kubectl apply -f ./users/users-service.yaml
+kubectl apply -f ./wallet/wallet-service.yaml
+
+kubectl port-forward service/booking 8081:8081
+kubectl port-forward service/users 8080:8080
+kubectl port-forward service/wallet 8082:8082
+

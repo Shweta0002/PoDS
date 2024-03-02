@@ -11,6 +11,6 @@ COPY . .
 RUN microdnf install -y maven
 
 # Build the projects with Maven
-RUN mvn clean install
+RUN mvn install
 
 ENTRYPOINT ["java" ,"-jar","target/wallet-0.0.1-SNAPSHOT.jar"]
