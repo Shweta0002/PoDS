@@ -23,7 +23,12 @@ import com.microservice.booking.service.ShowService;
 import com.microservice.booking.service.TheatreService;
 import jakarta.annotation.PostConstruct;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import org.springframework.transaction.annotation.Isolation;
+
 @Controller
+@Transactional(isolation = Isolation.SERIALIZABLE)
 public class BookingController {
 
 	@Autowired
@@ -217,7 +222,7 @@ public class BookingController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+	
 	@GetMapping("/theatres")
 	private ResponseEntity<List<Theatre>> getAllTheatres() {
 		try {

@@ -5,15 +5,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import jakarta.transaction.Transactional;
+
 
 import in.ac.iisc.wallet.VO.Users;
 import in.ac.iisc.wallet.model.Wallet;
 import in.ac.iisc.wallet.model.WalletTransaction;
 import in.ac.iisc.wallet.repository.WalletRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
-@Transactional
 @RestController
+@Transactional(isolation = Isolation.SERIALIZABLE)
 @RequestMapping("/wallets")
 public class WalletController {
 
@@ -23,6 +25,7 @@ public class WalletController {
     @Autowired
     private RestTemplate restTemplate;
 
+    
     @GetMapping("/{user_id}")
     public ResponseEntity<?> getUserWallet(@PathVariable Integer user_id) {
         try {
@@ -47,6 +50,7 @@ public class WalletController {
         }
     }
 
+    
     @PutMapping("/{user_id}")
     public ResponseEntity<?> updateBalance(@PathVariable Integer user_id, @RequestBody WalletTransaction transaction) {
         try {
@@ -89,6 +93,7 @@ public class WalletController {
         }
     }
 
+    
     @DeleteMapping("/{user_id}")
     public ResponseEntity<?> deleteWallet(@PathVariable Integer user_id) {
         try {
@@ -111,6 +116,7 @@ public class WalletController {
         }
     }
 
+    
     @DeleteMapping
     public ResponseEntity<?> deleteAllWallets() {
         try {

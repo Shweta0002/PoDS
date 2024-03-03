@@ -7,13 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+
 
 import in.ac.iisc.users.model.Users;
 import in.ac.iisc.users.repository.UsersRepository;
 
-@Transactional
 @RestController
+@Transactional(isolation = Isolation.SERIALIZABLE)
 @RequestMapping("/users")
 public class UsersController {
 
@@ -23,6 +25,7 @@ public class UsersController {
     @Autowired
     private RestTemplate restTemplate;
 
+    
     @GetMapping("/{user_id}")
     public ResponseEntity<?> getUser(@PathVariable Integer user_id) {
         try {
@@ -47,6 +50,7 @@ public class UsersController {
         }
     }
 
+   
     @PostMapping
     public ResponseEntity<?> addUser(@RequestBody Users user) {
         try {
@@ -71,6 +75,7 @@ public class UsersController {
         }
     }
 
+    
     @DeleteMapping("/{user_id}")
     public ResponseEntity<?> deleteUser(@PathVariable Integer user_id) {
         try {
@@ -106,7 +111,8 @@ public class UsersController {
             return ResponseEntity.internalServerError().body("An error occurred while processing the request");
         }
     }
-
+    
+    
     @DeleteMapping
     public ResponseEntity<?> deleteAllUsers() {
         try {

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: booking
 spec:
-  replicas: 2 # Define the desired number of replicas
+  replicas: 3 # Define the desired number of replicas
   selector:
     matchLabels:
       app: booking

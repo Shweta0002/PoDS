@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 import com.microservice.booking.VO.RequestWalletTransactionTemplate;
 import com.microservice.booking.VO.Users;
@@ -16,8 +17,8 @@ import com.microservice.booking.entities.Show;
 import com.microservice.booking.repository.BookingRepository;
 import com.microservice.booking.repository.ShowRepository;
 
-@Transactional
 @Service
+@Transactional(isolation = Isolation.SERIALIZABLE)
 public class BookingServiceImpl implements BookingService {
 
 

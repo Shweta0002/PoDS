@@ -14,6 +14,7 @@ kubectl apply -f ./users/users-deployment.yaml
 kubectl apply -f ./wallet/wallet-deployment.yaml
 
 kubectl apply -f ./booking/booking-service.yaml
+kubectl apply -f ./booking/booking-autoscaler.yaml
 kubectl apply -f ./users/users-service.yaml
 kubectl apply -f ./wallet/wallet-service.yaml
 
