@@ -17,6 +17,9 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   // Stores show actors for each showId
   public static final Map<Integer, ActorRef<ShowRegistry.Command>> showActors = new HashMap<>();
 
+  // Stores list of theatres
+  public static final List<Theatres> allTheatres = new ArrayList<>();
+
   // actor protocol
   sealed interface Command {
   }
@@ -33,24 +36,53 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   public final static record GetBooking(String name, ActorRef<GetBookingResponse> replyTo) implements Command {
   }
 
+  public final static record GetTheatres(ActorRef<TheatresReply> replyTo) implements Command {
+  }
+
   public final static record DeleteBooking(String name, ActorRef<ActionPerformed> replyTo) implements Command {
   }
 
   public final static record ActionPerformed(String description) implements Command {
   }
 
-  // booking-case-classes
   public final static record Booking(String name, int age, String countryOfResidence) {
+  }
+
+  public final static record Theatres(Integer id, String name, String location) {
+  }
+
+  public record TheatresReply(List<Theatres> theatres) {
   }
 
   public final static record Bookings(List<Booking> bookings) {
   }
-  // booking-case-classes
 
   private final List<Booking> bookings = new ArrayList<>();
 
   private BookingRegistry(ActorContext<Command> context) {
     super(context);
+
+    // Initialisation of theatres
+    String[] theatres = { "1,Helen Hayes Theater,240 W 44th St.",
+        "2,Cherry Lane Theatre,38 Commerce Street",
+        "3,New World Stages,340 West 50th Street",
+        "4,The Zipper Theater,100 E 17th St",
+        "5,Queens Theatre,Meadows Corona Park",
+        "6,The Public Theater,425 Lafayette St",
+        "7,Manhattan Ensemble Theatre,55 Mercer St.",
+        "8,Metropolitan Playhouse,220 E 4th St.",
+        "9,Acorn Theater,410 West 42nd Street",
+        "10,Apollo Theater,253 West 125th Street" };
+
+    for (String line : theatres) {
+      String[] str = line.split(","); // use comma as separator
+      int id = Integer.parseInt(str[0]);
+      String name = str[1];
+      String location = str[2];
+      allTheatres.add(new Theatres(id, name, location));
+    }
+
+    // Initialisation of shows - one actor per show
     String[] shows = { "1,1,Youth in Revolt,50,40",
         "2,1,Leap Year,55,30",
         "3,1,Remember Me,60,55",
@@ -92,42 +124,14 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   @Override
   public Receive<Command> createReceive() {
     return newReceiveBuilder()
-        // .onMessage(GetBookings.class, this::onGetBookings)
-        // .onMessage(CreateBooking.class, this::onCreateBooking)
-        // .onMessage(GetBooking.class, this::onGetBooking)
-        // .onMessage(DeleteBooking.class, this::onDeleteBooking)
+        .onMessage(GetTheatres.class, this::onGetTheatres)
         .build();
   }
 
-  // private Behavior<Command> onGetBookings(GetBookings command) {
-  // // We must be careful not to send out bookings since it is mutable
-  // // so for this response we need to make a defensive copy
-  // command.replyTo().tell(new Bookings(Collections.unmodifiableList(new
-  // ArrayList<>(bookings))));
-  // return this;
-  // }
-
-  // private Behavior<Command> onCreateBooking(CreateBooking command) {
-  // bookings.add(command.booking());
-  // command.replyTo().tell(new ActionPerformed(String.format("Booking %s
-  // created.", command.booking().name())));
-  // return this;
-  // }
-
-  // private Behavior<Command> onGetBooking(GetBooking command) {
-  // Optional<Booking> maybeBooking = bookings.stream()
-  // .filter(booking -> booking.name().equals(command.name()))
-  // .findFirst();
-  // command.replyTo().tell(new GetBookingResponse(maybeBooking));
-  // return this;
-  // }
-
-  // private Behavior<Command> onDeleteBooking(DeleteBooking command) {
-  // bookings.removeIf(booking -> booking.name().equals(command.name()));
-  // command.replyTo().tell(new ActionPerformed(String.format("Booking %s
-  // deleted.", command.name)));
-  // return this;
-  // }
+  private Behavior<Command> onGetTheatres(GetTheatres command) {
+    command.replyTo().tell(new TheatresReply(allTheatres));
+    return this;
+  }
 
 }
 // booking-registry-actor
