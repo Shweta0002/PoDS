@@ -4,7 +4,8 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
-import com.example.BookingRegistry.Booking;
+import com.example.BookingRegistry;
+import com.example.ShowRegistry;
 import akka.actor.typed.ActorRef;
 import akka.actor.typed.ActorSystem;
 import akka.actor.typed.Scheduler;
@@ -36,23 +37,20 @@ public class BookingRoutes {
     askTimeout = system.settings().config().getDuration("my-app.routes.ask-timeout");
   }
 
-  private CompletionStage<BookingRegistry.GetBookingResponse> getBooking(String name) {
-    return AskPattern.ask(bookingRegistryActor, ref -> new BookingRegistry.GetBooking(name, ref), askTimeout,
-        scheduler);
-  }
+  // private CompletionStage<BookingRegistry.ActionPerformed> deleteBookings() {
+  // return AskPattern.ask(bookingRegistryActor,
+  // BookingRegistry.DeleteBooking::new, askTimeout, scheduler);
 
-  private CompletionStage<BookingRegistry.ActionPerformed> deleteBooking(String name) {
-    return AskPattern.ask(bookingRegistryActor, ref -> new BookingRegistry.DeleteBooking(name, ref), askTimeout,
-        scheduler);
-  }
+  // }
 
-  private CompletionStage<BookingRegistry.Bookings> getBookings() {
-    return AskPattern.ask(bookingRegistryActor, BookingRegistry.GetBookings::new, askTimeout, scheduler);
-  }
+  // private CompletionStage<BookingRegistry.Theatres> getTheatres() {
+  // return AskPattern.ask(bookingRegistryActor, BookingRegistry.GetTheatres::new,
+  // askTimeout, scheduler);
+  // }
 
-  private CompletionStage<BookingRegistry.ActionPerformed> createBooking(Booking booking) {
-    return AskPattern.ask(bookingRegistryActor, ref -> new BookingRegistry.CreateBooking(booking, ref), askTimeout,
-        scheduler);
+  private CompletionStage<ShowRegistry.Show> getShow(Integer show_id) {
+    ActorRef<ShowRegistry.Command> showRegistryActor = BookingRegistry.showActors.get(show_id);
+    return AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.GetShow(show_id, ref), askTimeout, scheduler);
   }
 
   /**
@@ -61,37 +59,29 @@ public class BookingRoutes {
    */
   // #all-routes
   public Route bookingRoutes() {
-    return pathPrefix("bookings", () -> concat(
-        // #bookings-get-delete
-        pathEnd(() -> concat(
-            get(() -> onSuccess(getBookings(),
-                bookings -> complete(StatusCodes.OK, bookings, Jackson.marshaller()))),
-            post(() -> entity(
-                Jackson.unmarshaller(Booking.class),
-                booking -> onSuccess(createBooking(booking), performed -> {
-                  log.info("Create result: {}", performed.description());
-                  return complete(StatusCodes.CREATED, performed, Jackson.marshaller());
-                }))))),
-        // #bookings-get-delete
-        // #bookings-get-post
-        path(PathMatchers.segment(), (String name) -> concat(
-            get(() ->
-            // #retrieve-booking-info
-            rejectEmptyResponse(() -> onSuccess(getBooking(name),
-                performed -> complete(StatusCodes.OK, performed.maybeBooking(), Jackson.marshaller())))
-            // #retrieve-booking-info
-            ),
-            delete(() ->
-            // #bookings-delete-logic
-            onSuccess(deleteBooking(name), performed -> {
-              log.info("Delete result: {}", performed.description());
-              return complete(StatusCodes.OK, performed, Jackson.marshaller());
-            })
-            // #bookings-delete-logic
-            )))
-    // #bookings-get-post
-    ));
+    return concat(
+        // pathPrefix("bookings", () -> pathEnd(() -> delete(() ->
+        // onSuccess(deleteBookings(), performed -> {
+        // log.info("Delete result: {}", performed.description());
+        // return complete(StatusCodes.OK, performed, Jackson.marshaller());
+        // })))),
+        // pathPrefix("theatres",
+        // () -> pathEnd(() -> get(
+        // () -> onSuccess(getTheatres(), theatres -> complete(StatusCodes.OK, theatres,
+        // Jackson.marshaller()))))),
+
+        pathPrefix("shows", () -> path(PathMatchers.segment(), (String show_id) -> get(() -> {
+
+          return onSuccess(getShow(Integer.parseInt(show_id)), showDetails -> {
+            if (showDetails != null) {
+              return complete(StatusCodes.OK, showDetails, Jackson.marshaller());
+            } else {
+              return complete(StatusCodes.NOT_FOUND, "Show not found");
+            }
+          });
+        })))
+
+    );
   }
-  // #all-routes
 
 }
