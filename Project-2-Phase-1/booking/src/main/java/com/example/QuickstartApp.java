@@ -22,15 +22,14 @@ import java.util.concurrent.CompletionStage;
 public class QuickstartApp {
     // #start-http-server
     static void startHttpServer(Route route, ActorSystem<?> system) {
-        CompletionStage<ServerBinding> futureBinding =
-            Http.get(system).newServerAt("localhost", 8081).bind(route);
+        CompletionStage<ServerBinding> futureBinding = Http.get(system).newServerAt("localhost", 8081).bind(route);
 
         futureBinding.whenComplete((binding, exception) -> {
             if (binding != null) {
                 InetSocketAddress address = binding.localAddress();
                 system.log().info("Server online at http://{}:{}/",
-                    address.getHostString(),
-                    address.getPort());
+                        address.getHostString(),
+                        address.getPort());
             } else {
                 system.log().error("Failed to bind HTTP endpoint, terminating system", exception);
                 system.terminate();
@@ -40,23 +39,21 @@ public class QuickstartApp {
     // #start-http-server
 
     public static void main(String[] args) throws Exception {
-        //#server-bootstrapping
+        // #server-bootstrapping
         Behavior<NotUsed> rootBehavior = Behaviors.setup(context -> {
-            ActorRef<UserRegistry.Command> userRegistryActor =
-                context.spawn(UserRegistry.create(), "UserRegistry");
+            ActorRef<BookingRegistry.Command> bookingRegistryActor = context.spawn(BookingRegistry.create(),
+                    "BookingRegistry");
 
-            UserRoutes userRoutes = new UserRoutes(context.getSystem(), userRegistryActor);
-            startHttpServer(userRoutes.userRoutes(), context.getSystem());
+            BookingRoutes bookingRoutes = new BookingRoutes(context.getSystem(), bookingRegistryActor);
+            startHttpServer(bookingRoutes.bookingRoutes(), context.getSystem());
 
             return Behaviors.empty();
         });
 
         // boot up server using the route as defined below
         ActorSystem.create(rootBehavior, "HelloAkkaHttpServer");
-        //#server-bootstrapping
+        // #server-bootstrapping
     }
 
 }
-//#main-class
-
-
+// #main-class
