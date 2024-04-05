@@ -24,29 +24,36 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   sealed interface Command {
   }
 
-  public final static record GetBookings(ActorRef<Bookings> replyTo) implements Command {
-  }
+  // public final static record GetBookings(ActorRef<Bookings> replyTo) implements
+  // Command {
+  // }
 
-  public final static record CreateBooking(Booking booking, ActorRef<ActionPerformed> replyTo) implements Command {
-  }
+  // public final static record CreateBooking(Booking booking,
+  // ActorRef<ActionPerformed> replyTo) implements Command {
+  // }
 
-  public final static record GetBookingResponse(Optional<Booking> maybeBooking) {
-  }
+  // public final static record GetBookingResponse(Optional<Booking> maybeBooking)
+  // {
+  // }
 
-  public final static record GetBooking(String name, ActorRef<GetBookingResponse> replyTo) implements Command {
-  }
+  // public final static record GetBooking(String name,
+  // ActorRef<GetBookingResponse> replyTo) implements Command {
+  // }
 
   public final static record GetTheatres(ActorRef<TheatresReply> replyTo) implements Command {
   }
 
-  public final static record DeleteBooking(String name, ActorRef<ActionPerformed> replyTo) implements Command {
-  }
+  // public final static record DeleteBooking(String name,
+  // ActorRef<ActionPerformed> replyTo) implements Command {
+  // }
 
-  public final static record ActionPerformed(String description) implements Command {
-  }
+  // public final static record ActionPerformed(String description) implements
+  // Command {
+  // }
 
-  public final static record Booking(String name, int age, String countryOfResidence) {
-  }
+  // public final static record Booking(String name, int age, String
+  // countryOfResidence) {
+  // }
 
   public final static record Theatres(Integer id, String name, String location) {
   }
@@ -54,10 +61,10 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   public record TheatresReply(List<Theatres> theatres) {
   }
 
-  public final static record Bookings(List<Booking> bookings) {
-  }
+  // public final static record Bookings(List<Booking> bookings) {
+  // }
 
-  private final List<Booking> bookings = new ArrayList<>();
+  // private final List<Booking> bookings = new ArrayList<>();
 
   private BookingRegistry(ActorContext<Command> context) {
     super(context);
@@ -134,4 +141,3 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   }
 
 }
-// booking-registry-actor
