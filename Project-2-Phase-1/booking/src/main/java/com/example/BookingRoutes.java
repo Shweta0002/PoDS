@@ -83,14 +83,15 @@ public class BookingRoutes {
             }
           });
         }))),
-        pathPrefix("shows/theatres", () -> path(PathMatchers.segment(), (String theatre_id) -> get(() -> {
-          return onSuccess(getShowsOfTheatre(Integer.parseInt(theatre_id)), showDetails -> {
-            if (showDetails != null) {
-              return complete(StatusCodes.OK, showDetails, Jackson.marshaller());
-            } else {
-              return complete(StatusCodes.NOT_FOUND, "Shows not found for the particular theatre");
-            }
-          });
-        }))));
+        path(PathMatchers.segment("shows").slash("theatres").slash(PathMatchers.segment()),
+            (String theatre_id) -> get(() -> {
+              return onSuccess(getShowsOfTheatre(Integer.parseInt(theatre_id)), showDetails -> {
+                if (showDetails != null) {
+                  return complete(StatusCodes.OK, showDetails, Jackson.marshaller());
+                } else {
+                  return complete(StatusCodes.NOT_FOUND, "Shows not found for the particular theatre");
+                }
+              });
+            })));
   }
 }
