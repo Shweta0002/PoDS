@@ -28,9 +28,9 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
     public final static record GetShow(Integer show_id, ActorRef<Show> replyTo) implements Command {
     }
 
-    // public final static record GetShowsAtTheatre(Integer theatre_id,
-    // ActorRef<Show> replyTo) implements Command {
-    // }
+    public final static record GetShowOfTheatre(Integer show_id, Integer theatre_id, ActorRef<Show> replyTo)
+            implements Command {
+    }
 
     public final static record ActionPerformed(String description) implements Command {
     }
@@ -63,6 +63,7 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
     public Receive<Command> createReceive() {
         return newReceiveBuilder()
                 .onMessage(GetShow.class, this::onGetShow)
+                .onMessage(GetShowOfTheatre.class, this::onGetShowOfTheatre)
                 .build();
     }
 
@@ -70,6 +71,15 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
         if (this.id.equals(command.show_id())) {
             command.replyTo().tell(new Show(this.id, this.theatre_id, this.title, this.price, this.seats_available));
 
+        }
+        return this;
+    }
+
+    private Behavior<Command> onGetShowOfTheatre(GetShowOfTheatre command) {
+        if (this.theatre_id.equals(command.theatre_id())) {
+            command.replyTo().tell(new Show(this.id, this.theatre_id, this.title, this.price, this.seats_available));
+        } else {
+            command.replyTo().tell(new Show(null, this.theatre_id, this.title, this.price, this.seats_available));
         }
         return this;
     }

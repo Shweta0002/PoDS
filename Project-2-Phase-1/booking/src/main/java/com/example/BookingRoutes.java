@@ -1,8 +1,9 @@
 package com.example;
 
 import java.time.Duration;
-import java.util.Optional;
-import java.util.concurrent.CompletionStage;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.concurrent.*;
 
 import com.example.BookingRegistry;
 import com.example.ShowRegistry;
@@ -43,6 +44,30 @@ public class BookingRoutes {
     return AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.GetShow(show_id, ref), askTimeout, scheduler);
   }
 
+  private CompletionStage<List<ShowRegistry.Show>> getShowsOfTheatre(Integer theatre_id) {
+    List<CompletionStage<ShowRegistry.Show>> futures = new ArrayList<>();
+
+    for (int show_id : BookingRegistry.showActors.keySet()) {
+      ActorRef<ShowRegistry.Command> showRegistryActor = BookingRegistry.showActors.get(show_id);
+      futures.add(
+          AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.GetShowOfTheatre(show_id, theatre_id, ref),
+              askTimeout,
+              scheduler));
+
+    }
+
+    CompletableFuture<ShowRegistry.Show>[] futuresArray = futures.toArray(new CompletableFuture[0]);
+    CompletableFuture<Void> allOfFuture = CompletableFuture.allOf(futuresArray);
+
+    return allOfFuture.thenApply(v -> {
+      return futures.stream()
+          .map(CompletionStage::toCompletableFuture)
+          .map(CompletableFuture::join)
+          .filter(show -> show != null && show.id() != null) // Filter out null shows and shows with null IDs
+          .collect(Collectors.toList()); // Collect non-null shows into a list
+    });
+  }
+
   public Route bookingRoutes() {
     return concat(
         pathPrefix("theatres",
@@ -55,6 +80,15 @@ public class BookingRoutes {
               return complete(StatusCodes.OK, showDetails, Jackson.marshaller());
             } else {
               return complete(StatusCodes.NOT_FOUND, "Show not found");
+            }
+          });
+        }))),
+        pathPrefix("shows/theatres", () -> path(PathMatchers.segment(), (String theatre_id) -> get(() -> {
+          return onSuccess(getShowsOfTheatre(Integer.parseInt(theatre_id)), showDetails -> {
+            if (showDetails != null) {
+              return complete(StatusCodes.OK, showDetails, Jackson.marshaller());
+            } else {
+              return complete(StatusCodes.NOT_FOUND, "Shows not found for the particular theatre");
             }
           });
         }))));
