@@ -71,7 +71,6 @@ def test_user_booking_cancellation_flow():
         booking_payload = {"show_id": 1, "user_id": user_id, "seats_booked": 2}
         booking_response=requests.post(bookingServiceURL + "/bookings", json=booking_payload)
         assert booking_response.status_code == 200
-        booking_id = booking_response.json()["id"]
 
         # Step 4: Get wallet details after the booking (balance should be deducted)
         getShow=get_show_details(showId)
