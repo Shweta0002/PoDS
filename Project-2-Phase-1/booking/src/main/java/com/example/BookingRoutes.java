@@ -100,6 +100,28 @@ public class BookingRoutes {
     });
   }
 
+  private CompletionStage<List<ShowRegistry.Response>> deleteAllUserBookings(Integer user_id) {
+    List<CompletionStage<ShowRegistry.Response>> futures = new ArrayList<>();
+    for (int show_id : BookingRegistry.showActors.keySet()) {
+      ActorRef<ShowRegistry.Command> showRegistryActor = BookingRegistry.showActors.get(show_id);
+      futures.add(
+          AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.DeleteAllUserBookings(show_id, user_id, ref),
+              askTimeout,
+              scheduler));
+    }
+
+    CompletableFuture<ShowRegistry.Response>[] futuresArray = futures.toArray(new CompletableFuture[0]);
+    CompletableFuture<Void> allOfFuture = CompletableFuture.allOf(futuresArray);
+
+    return allOfFuture.thenApply(v -> {
+      return futures.stream()
+          .map(CompletionStage::toCompletableFuture)
+          .map(CompletableFuture::join)
+          .filter(response -> response.description() == "Done")
+          .collect(Collectors.toList());
+    });
+  }
+
   public Route bookingRoutes() {
     return concat(
         pathPrefix("theatres",
@@ -161,6 +183,16 @@ public class BookingRoutes {
                   return complete(StatusCodes.OK, bookings, Jackson.marshaller());
                 } else {
                   return complete(StatusCodes.NOT_FOUND, "Bookings not found for the particular user");
+                }
+              });
+            })),
+        path(PathMatchers.segment("bookings").slash("users").slash(PathMatchers.segment()),
+            (String user_id) -> delete(() -> {
+              return onSuccess(deleteAllUserBookings(Integer.parseInt(user_id)), bookingDetails -> {
+                if (bookingDetails.size() != 0) {
+                  return complete(StatusCodes.OK);
+                } else {
+                  return complete(StatusCodes.NOT_FOUND, "Show not found");
                 }
               });
             }))

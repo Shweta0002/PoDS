@@ -59,6 +59,11 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
             implements Command {
     }
 
+    public final record DeleteAllUserBookings(Integer show_id, Integer user_id,
+            ActorRef<ShowRegistry.Response> replyTo)
+            implements Command {
+    }
+
     private ShowRegistry(ActorContext<Command> context, Integer id, Integer theatre_id, String title, Integer price,
             Integer seats_available) {
         super(context);
@@ -82,6 +87,7 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
                 .onMessage(AddBooking.class, this::onAddBooking)
                 .onMessage(DeleteUserBooking.class, this::onDeleteUserBooking)
                 .onMessage(GetAllUserBookings.class, this::onGetAllUserBookings)
+                .onMessage(DeleteAllUserBookings.class, this::onDeleteAllUserBookings)
                 .build();
     }
 
@@ -113,6 +119,26 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
             }
         }
         command.replyTo().tell(new UserBookings(userBookings));
+        return this;
+    }
+
+    private Behavior<Command> onDeleteAllUserBookings(DeleteAllUserBookings command) {
+        ListIterator<Booking> iter = bookings.listIterator();
+        boolean hasBookings = false;
+        while (iter.hasNext()) {
+            Booking currentBooking = iter.next();
+            if (Objects.equals(currentBooking.user_id, command.user_id)
+                    && Objects.equals(currentBooking.show_id, command.show_id)) {
+                hasBookings = true;
+                this.seats_available += currentBooking.seats_booked;
+                iter.remove();
+            }
+        }
+        if (hasBookings) {
+            command.replyTo().tell(new Response("Done"));
+        } else {
+            command.replyTo().tell(new Response("NOT_FOUND"));
+        }
         return this;
     }
 
