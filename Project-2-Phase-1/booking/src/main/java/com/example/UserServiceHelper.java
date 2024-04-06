@@ -20,7 +20,7 @@ public class UserServiceHelper {
         Integer timeOut = PAYMENT_MAX_RETRY;
 
         // TODO: change it to docker base url
-        String url = "http://localhost:8080/users/" + Integer.toString(userId);
+        String url = "http://host.docker.internal:8080/users/" + Integer.toString(userId);
 
         try {
             while (timeOut-- != 0) {
