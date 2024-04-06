@@ -128,8 +128,14 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
     Integer show_id = command.booking.show_id;
     Integer seats_booked = command.booking.seats_booked;
     ActorRef<ShowRegistry.Booking> replyTo = command.replyTo;
-    showActors.get(show_id)
-        .tell(new ShowRegistry.AddBooking(new ShowRegistry.Booking(count, user_id, show_id, seats_booked), replyTo));
+
+    // If the show does not exist, return HTTP 400 (Bad Request)
+    if (show_id > 20 || show_id < 1) {
+      replyTo.tell(new ShowRegistry.Booking(null, null, null, null));
+    } else {
+      showActors.get(show_id)
+          .tell(new ShowRegistry.AddBooking(new ShowRegistry.Booking(count, user_id, show_id, seats_booked), replyTo));
+    }
     return this;
   }
 

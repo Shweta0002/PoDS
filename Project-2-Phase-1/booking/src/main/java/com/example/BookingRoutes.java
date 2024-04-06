@@ -178,16 +178,17 @@ public class BookingRoutes {
                 }
               });
             })),
+        // API-5
         pathPrefix("bookings",
             () -> pathEnd(() -> post(() -> entity(
                 Jackson.unmarshaller(BookingRegistry.Booking.class),
                 booking -> onSuccess(addBooking(booking), bookingDetails -> {
-                  if (bookingDetails != null) {
-                    return complete(StatusCodes.CREATED, bookingDetails, Jackson.marshaller());
+                  if (bookingDetails.id() != null) {
+                    System.out.println("API5" + "----" + bookingDetails);
+                    return complete(StatusCodes.CREATED);
                   } else {
-                    return complete(StatusCodes.NOT_FOUND, "Show not found");
+                    return complete(StatusCodes.BAD_REQUEST, "Some error occured");
                   }
-
                 }))))),
         path(
             PathMatchers.segment("bookings").slash("users").slash(PathMatchers.segment()).slash("shows")
@@ -201,6 +202,7 @@ public class BookingRoutes {
                 }
               });
             })),
+        // API-4
         path(PathMatchers.segment("bookings").slash("users").slash(PathMatchers.segment()),
             (String user_id) -> get(() -> {
               return onSuccess(getAllUserBookings(Integer.parseInt(user_id)), bookingDetails -> {
