@@ -67,7 +67,7 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
             implements Command {
     }
 
-    public final record DeleteAllBookings(Integer show_id, ActorRef<ShowRegistry.Response> replyTo)
+    public final record DeleteAllBookings(ActorRef<ShowRegistry.Response> replyTo)
             implements Command {
     }
 
@@ -157,20 +157,27 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
     }
 
     private Behavior<Command> onDeleteAllBookings(DeleteAllBookings command) {
+        Map<Integer, Integer> totalRefunds = new HashMap<>();
+
         ListIterator<Booking> iter = bookings.listIterator();
         while (iter.hasNext()) {
             Booking currentBooking = iter.next();
-            if (Objects.equals(currentBooking.show_id, command.show_id)) {
-
-                // // Amount to make these bookin to be returned to users wallets
-                // String walletRefundStatus =
-                // WalletServiceHelper.refund(currentBooking.user_id,
-                // currentBooking.seats_booked * this.price, http);
-                // System.out.println("walletRefundStatus - " + walletRefundStatus);
-
-                this.seats_available += currentBooking.seats_booked;
-                iter.remove();
+            if (totalRefunds.containsKey(currentBooking.user_id)) {
+                totalRefunds.put(currentBooking.user_id,
+                        totalRefunds.get(currentBooking.user_id)
+                                + currentBooking.seats_booked * BookingRegistry.showPrices.get(currentBooking.show_id));
+            } else {
+                totalRefunds.put(currentBooking.user_id,
+                        currentBooking.seats_booked * BookingRegistry.showPrices.get(currentBooking.show_id));
             }
+
+            this.seats_available += currentBooking.seats_booked;
+            iter.remove();
+        }
+
+        for (int user_id : totalRefunds.keySet()) {
+            // Amount to make these bookin to be returned to users wallets
+            String walletRefundStatus = WalletServiceHelper.refund(user_id, totalRefunds.get(user_id), http);
         }
         command.replyTo().tell(new Response("Done"));
         return this;

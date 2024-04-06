@@ -18,6 +18,7 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
 
   // Stores show actors for each showId
   public static final Map<Integer, ActorRef<ShowRegistry.Command>> showActors = new HashMap<>();
+  public static final Map<Integer, Integer> showPrices = new HashMap<>();
 
   // Stores list of theatres
   public static final List<Theatres> allTheatres = new ArrayList<>();
@@ -95,6 +96,7 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
       int price = Integer.parseInt(str[3]);
       int seats_available = Integer.parseInt(str[4]);
 
+      showPrices.put(show_id, price);
       showActors.put(show_id,
           context.spawn(ShowRegistry.create(show_id, theatre_id, title, price, seats_available), "Show" + show_id));
     }

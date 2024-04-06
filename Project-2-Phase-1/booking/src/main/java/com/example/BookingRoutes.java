@@ -123,26 +123,33 @@ public class BookingRoutes {
     });
   }
 
-  private CompletionStage<List<ShowRegistry.Response>> deleteAllBookings() {
-    List<CompletionStage<ShowRegistry.Response>> futures = new ArrayList<>();
-    for (int show_id : BookingRegistry.showActors.keySet()) {
-      ActorRef<ShowRegistry.Command> showRegistryActor = BookingRegistry.showActors.get(show_id);
-      futures.add(
-          AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.DeleteAllBookings(show_id, ref),
-              askTimeout,
-              scheduler));
-    }
+  private CompletionStage<ShowRegistry.Response> deleteAllBookings() {
+    ActorRef<ShowRegistry.Command> showRegistryActor = BookingRegistry.showActors.get(1);
+    return AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.DeleteAllBookings(ref),
+        askTimeout, scheduler);
 
-    CompletableFuture<ShowRegistry.Response>[] futuresArray = futures.toArray(new CompletableFuture[0]);
-    CompletableFuture<Void> allOfFuture = CompletableFuture.allOf(futuresArray);
+    // List<CompletionStage<ShowRegistry.Response>> futures = new ArrayList<>();
+    // for (int show_id : BookingRegistry.showActors.keySet()) {
+    // ActorRef<ShowRegistry.Command> showRegistryActor =
+    // BookingRegistry.showActors.get(show_id);
+    // futures.add(
+    // AskPattern.ask(showRegistryActor, ref -> new
+    // ShowRegistry.DeleteAllBookings(show_id, ref),
+    // askTimeout,
+    // scheduler));
+    // }
 
-    return allOfFuture.thenApply(v -> {
-      return futures.stream()
-          .map(CompletionStage::toCompletableFuture)
-          .map(CompletableFuture::join)
-          .filter(response -> response.description() == "Done")
-          .collect(Collectors.toList());
-    });
+    // CompletableFuture<ShowRegistry.Response>[] futuresArray = futures.toArray(new
+    // CompletableFuture[0]);
+    // CompletableFuture<Void> allOfFuture = CompletableFuture.allOf(futuresArray);
+
+    // return allOfFuture.thenApply(v -> {
+    // return futures.stream()
+    // .map(CompletionStage::toCompletableFuture)
+    // .map(CompletableFuture::join)
+    // .filter(response -> response.description() == "Done")
+    // .collect(Collectors.toList());
+    // });
   }
 
   public Route bookingRoutes() {
@@ -199,7 +206,6 @@ public class BookingRoutes {
                 return complete(StatusCodes.NOT_FOUND, "Show doesnot exist");
               }
               return onSuccess(deleteUserBooking(Integer.parseInt(user_id), Integer.parseInt(show_id)), showDetails -> {
-                System.out.println("-------------" + showDetails.description());
                 if (showDetails.description() != "Not_Found") {
                   return complete(StatusCodes.OK);
                 } else {
