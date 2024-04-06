@@ -122,6 +122,28 @@ public class BookingRoutes {
     });
   }
 
+  private CompletionStage<List<ShowRegistry.Response>> deleteAllBookings() {
+    List<CompletionStage<ShowRegistry.Response>> futures = new ArrayList<>();
+    for (int show_id : BookingRegistry.showActors.keySet()) {
+      ActorRef<ShowRegistry.Command> showRegistryActor = BookingRegistry.showActors.get(show_id);
+      futures.add(
+          AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.DeleteAllBookings(show_id, ref),
+              askTimeout,
+              scheduler));
+    }
+
+    CompletableFuture<ShowRegistry.Response>[] futuresArray = futures.toArray(new CompletableFuture[0]);
+    CompletableFuture<Void> allOfFuture = CompletableFuture.allOf(futuresArray);
+
+    return allOfFuture.thenApply(v -> {
+      return futures.stream()
+          .map(CompletionStage::toCompletableFuture)
+          .map(CompletableFuture::join)
+          .filter(response -> response.description() == "Done")
+          .collect(Collectors.toList());
+    });
+  }
+
   public Route bookingRoutes() {
     return concat(
         pathPrefix("theatres",
@@ -195,7 +217,13 @@ public class BookingRoutes {
                   return complete(StatusCodes.NOT_FOUND, "Show not found");
                 }
               });
-            }))
+            })),
+        pathPrefix("bookings",
+            () -> pathEnd(() -> delete(() -> {
+              return onSuccess(deleteAllBookings(), response -> {
+                return complete(StatusCodes.OK);
+              });
+            })))
 
     );
   }
