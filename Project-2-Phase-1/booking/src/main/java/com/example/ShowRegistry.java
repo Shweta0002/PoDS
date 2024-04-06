@@ -43,10 +43,19 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
     public final static record Response(String description) {
     }
 
+    public final static record UserBookings(List<ShowRegistry.Booking> bookings) {
+
+    }
+
     public final static record AddBooking(Booking booking, ActorRef<ShowRegistry.Booking> replyTo) implements Command {
     }
 
     public final static record DeleteUserBooking(Integer user_id, Integer show_id, ActorRef<Response> replyTo)
+            implements Command {
+    }
+
+    public final record GetAllUserBookings(Integer show_id, Integer user_id,
+            ActorRef<ShowRegistry.UserBookings> replyTo)
             implements Command {
     }
 
@@ -72,6 +81,7 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
                 .onMessage(GetShowOfTheatre.class, this::onGetShowOfTheatre)
                 .onMessage(AddBooking.class, this::onAddBooking)
                 .onMessage(DeleteUserBooking.class, this::onDeleteUserBooking)
+                .onMessage(GetAllUserBookings.class, this::onGetAllUserBookings)
                 .build();
     }
 
@@ -89,6 +99,20 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
         } else {
             command.replyTo().tell(new Show(null, this.theatre_id, this.title, this.price, this.seats_available));
         }
+        return this;
+    }
+
+    private Behavior<Command> onGetAllUserBookings(GetAllUserBookings command) {
+        ListIterator<Booking> iter = bookings.listIterator();
+        List<Booking> userBookings = new ArrayList<>();
+        while (iter.hasNext()) {
+            Booking currentBooking = iter.next();
+            if (Objects.equals(currentBooking.user_id, command.user_id)
+                    && Objects.equals(currentBooking.show_id, command.show_id)) {
+                userBookings.add(currentBooking);
+            }
+        }
+        command.replyTo().tell(new UserBookings(userBookings));
         return this;
     }
 

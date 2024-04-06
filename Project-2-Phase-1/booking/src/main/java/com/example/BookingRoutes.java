@@ -78,6 +78,28 @@ public class BookingRoutes {
         askTimeout, scheduler);
   }
 
+  private CompletionStage<List<ShowRegistry.UserBookings>> getAllUserBookings(Integer user_id) {
+    List<CompletionStage<ShowRegistry.UserBookings>> futures = new ArrayList<>();
+    for (int show_id : BookingRegistry.showActors.keySet()) {
+      ActorRef<ShowRegistry.Command> showRegistryActor = BookingRegistry.showActors.get(show_id);
+      futures.add(
+          AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.GetAllUserBookings(show_id, user_id, ref),
+              askTimeout,
+              scheduler));
+    }
+
+    CompletableFuture<ShowRegistry.UserBookings>[] futuresArray = futures.toArray(new CompletableFuture[0]);
+    CompletableFuture<Void> allOfFuture = CompletableFuture.allOf(futuresArray);
+
+    return allOfFuture.thenApply(v -> {
+      return futures.stream()
+          .map(CompletionStage::toCompletableFuture)
+          .map(CompletableFuture::join)
+          .filter(booking -> booking.bookings().size() != 0)
+          .collect(Collectors.toList());
+    });
+  }
+
   public Route bookingRoutes() {
     return concat(
         pathPrefix("theatres",
@@ -125,6 +147,24 @@ public class BookingRoutes {
                   return complete(StatusCodes.NOT_FOUND, "Show not found");
                 }
               });
-            })));
+            })),
+        path(PathMatchers.segment("bookings").slash("users").slash(PathMatchers.segment()),
+            (String user_id) -> get(() -> {
+              return onSuccess(getAllUserBookings(Integer.parseInt(user_id)), bookingDetails -> {
+                List<ShowRegistry.Booking> bookings = new ArrayList<>();
+                for (ShowRegistry.UserBookings ub : bookingDetails) {
+                  for (ShowRegistry.Booking b : ub.bookings()) {
+                    bookings.add(b);
+                  }
+                }
+                if (bookingDetails != null) {
+                  return complete(StatusCodes.OK, bookings, Jackson.marshaller());
+                } else {
+                  return complete(StatusCodes.NOT_FOUND, "Bookings not found for the particular user");
+                }
+              });
+            }))
+
+    );
   }
 }
