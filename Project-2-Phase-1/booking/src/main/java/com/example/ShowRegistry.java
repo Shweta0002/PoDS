@@ -107,8 +107,9 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
     private Behavior<Command> onDeleteUserBooking(DeleteUserBooking command) {
         ListIterator<Booking> iter = bookings.listIterator();
         while (iter.hasNext()) {
-            if (Objects.equals(iter.next().user_id, command.user_id)) {
-                seats_available += iter.next().seats_booked;
+            Booking currentBooking = iter.next();
+            if (Objects.equals(currentBooking.user_id, command.user_id)) {
+                seats_available += currentBooking.seats_booked;
                 iter.remove();
             }
         }

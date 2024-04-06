@@ -114,15 +114,17 @@ public class BookingRoutes {
                   }
 
                 }))))),
-        pathPrefix("bookings", () -> path(PathMatchers.integerSegment(),
-            user_id -> path(PathMatchers.integerSegment(), show_id -> delete(() -> {
-              return onSuccess(deleteUserBooking(user_id, show_id), showDetails -> {
+        path(
+            PathMatchers.segment("bookings").slash("users").slash(PathMatchers.segment()).slash("shows")
+                .slash(PathMatchers.segment()),
+            (String user_id, String show_id) -> delete(() -> {
+              return onSuccess(deleteUserBooking(Integer.parseInt(user_id), Integer.parseInt(show_id)), showDetails -> {
                 if (showDetails != null) {
                   return complete(StatusCodes.OK);
                 } else {
                   return complete(StatusCodes.NOT_FOUND, "Show not found");
                 }
               });
-            })))));
+            })));
   }
 }
