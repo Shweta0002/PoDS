@@ -68,6 +68,16 @@ public class BookingRoutes {
     });
   }
 
+  private CompletionStage<ShowRegistry.Booking> addBooking(BookingRegistry.Booking booking) {
+    return AskPattern.ask(bookingRegistryActor, ref -> new BookingRegistry.AddBooking(booking, ref), askTimeout,
+        scheduler);
+  }
+
+  private CompletionStage<ShowRegistry.Response> deleteUserBooking(Integer user_id, Integer show_id) {
+    return AskPattern.ask(bookingRegistryActor, ref -> new BookingRegistry.DeleteUserBooking(user_id, show_id, ref),
+        askTimeout, scheduler);
+  }
+
   public Route bookingRoutes() {
     return concat(
         pathPrefix("theatres",
@@ -92,6 +102,27 @@ public class BookingRoutes {
                   return complete(StatusCodes.NOT_FOUND, "Shows not found for the particular theatre");
                 }
               });
-            })));
+            })),
+        pathPrefix("bookings",
+            () -> pathEnd(() -> post(() -> entity(
+                Jackson.unmarshaller(BookingRegistry.Booking.class),
+                booking -> onSuccess(addBooking(booking), bookingDetails -> {
+                  if (bookingDetails != null) {
+                    return complete(StatusCodes.CREATED, bookingDetails, Jackson.marshaller());
+                  } else {
+                    return complete(StatusCodes.NOT_FOUND, "Show not found");
+                  }
+
+                }))))),
+        pathPrefix("bookings", () -> path(PathMatchers.integerSegment(),
+            user_id -> path(PathMatchers.integerSegment(), show_id -> delete(() -> {
+              return onSuccess(deleteUserBooking(user_id, show_id), showDetails -> {
+                if (showDetails != null) {
+                  return complete(StatusCodes.OK);
+                } else {
+                  return complete(StatusCodes.NOT_FOUND, "Show not found");
+                }
+              });
+            })))));
   }
 }

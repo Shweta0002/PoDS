@@ -14,6 +14,8 @@ import java.util.*;
 // booking-registry-actor
 public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
 
+  public Integer count;
+
   // Stores show actors for each showId
   public static final Map<Integer, ActorRef<ShowRegistry.Command>> showActors = new HashMap<>();
 
@@ -24,36 +26,8 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   sealed interface Command {
   }
 
-  // public final static record GetBookings(ActorRef<Bookings> replyTo) implements
-  // Command {
-  // }
-
-  // public final static record CreateBooking(Booking booking,
-  // ActorRef<ActionPerformed> replyTo) implements Command {
-  // }
-
-  // public final static record GetBookingResponse(Optional<Booking> maybeBooking)
-  // {
-  // }
-
-  // public final static record GetBooking(String name,
-  // ActorRef<GetBookingResponse> replyTo) implements Command {
-  // }
-
   public final static record GetTheatres(ActorRef<TheatresReply> replyTo) implements Command {
   }
-
-  // public final static record DeleteBooking(String name,
-  // ActorRef<ActionPerformed> replyTo) implements Command {
-  // }
-
-  // public final static record ActionPerformed(String description) implements
-  // Command {
-  // }
-
-  // public final static record Booking(String name, int age, String
-  // countryOfResidence) {
-  // }
 
   public final static record Theatres(Integer id, String name, String location) {
   }
@@ -61,13 +35,19 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   public record TheatresReply(List<Theatres> theatres) {
   }
 
-  // public final static record Bookings(List<Booking> bookings) {
-  // }
+  public final static record Booking(Integer id, Integer user_id, Integer show_id, Integer seats_booked) {
+  }
 
-  // private final List<Booking> bookings = new ArrayList<>();
+  public final static record AddBooking(Booking booking, ActorRef<ShowRegistry.Booking> replyTo) implements Command {
+  }
+
+  public final record DeleteUserBooking(Integer user_id, Integer show_id, ActorRef<ShowRegistry.Response> replyTo)
+      implements Command {
+  }
 
   private BookingRegistry(ActorContext<Command> context) {
     super(context);
+    count = 0;
 
     // Initialisation of theatres
     String[] theatres = { "1,Helen Hayes Theater,240 W 44th St.",
@@ -132,11 +112,30 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   public Receive<Command> createReceive() {
     return newReceiveBuilder()
         .onMessage(GetTheatres.class, this::onGetTheatres)
+        .onMessage(AddBooking.class, this::onAddBooking)
+        .onMessage(DeleteUserBooking.class, this::onDeleteUserBooking)
         .build();
   }
 
   private Behavior<Command> onGetTheatres(GetTheatres command) {
     command.replyTo().tell(new TheatresReply(allTheatres));
+    return this;
+  }
+
+  private Behavior<Command> onAddBooking(AddBooking command) {
+    this.count = this.count + 1;
+    Integer user_id = command.booking.user_id;
+    Integer show_id = command.booking.show_id;
+    Integer seats_booked = command.booking.seats_booked;
+    ActorRef<ShowRegistry.Booking> replyTo = command.replyTo;
+    showActors.get(show_id)
+        .tell(new ShowRegistry.AddBooking(new ShowRegistry.Booking(count, user_id, show_id, seats_booked), replyTo));
+    return this;
+  }
+
+  private Behavior<Command> onDeleteUserBooking(DeleteUserBooking command) {
+    showActors.get(command.show_id)
+        .tell(new ShowRegistry.DeleteUserBooking(command.user_id, command.show_id, command.replyTo));
     return this;
   }
 
