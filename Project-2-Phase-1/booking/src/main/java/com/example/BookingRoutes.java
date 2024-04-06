@@ -185,7 +185,7 @@ public class BookingRoutes {
                 booking -> onSuccess(addBooking(booking), bookingDetails -> {
                   if (bookingDetails.id() != null) {
                     System.out.println("API5" + "----" + bookingDetails);
-                    return complete(StatusCodes.CREATED);
+                    return complete(StatusCodes.OK);
                   } else {
                     return complete(StatusCodes.BAD_REQUEST, "Some error occured");
                   }
