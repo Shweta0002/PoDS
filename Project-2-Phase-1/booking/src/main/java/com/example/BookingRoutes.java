@@ -74,7 +74,8 @@ public class BookingRoutes {
   }
 
   private CompletionStage<ShowRegistry.Response> deleteUserBooking(Integer user_id, Integer show_id) {
-    return AskPattern.ask(bookingRegistryActor, ref -> new BookingRegistry.DeleteUserBooking(user_id, show_id, ref),
+    ActorRef<ShowRegistry.Command> showRegistryActor = BookingRegistry.showActors.get(show_id);
+    return AskPattern.ask(showRegistryActor, ref -> new ShowRegistry.DeleteUserBooking(user_id, show_id, ref),
         askTimeout, scheduler);
   }
 
@@ -189,12 +190,17 @@ public class BookingRoutes {
                     return complete(StatusCodes.BAD_REQUEST, "Some error occured");
                   }
                 }))))),
+        // API-7
         path(
             PathMatchers.segment("bookings").slash("users").slash(PathMatchers.segment()).slash("shows")
                 .slash(PathMatchers.segment()),
             (String user_id, String show_id) -> delete(() -> {
+              if (Integer.parseInt(show_id) > 20 || Integer.parseInt(show_id) < 1) {
+                return complete(StatusCodes.NOT_FOUND, "Show doesnot exist");
+              }
               return onSuccess(deleteUserBooking(Integer.parseInt(user_id), Integer.parseInt(show_id)), showDetails -> {
-                if (showDetails != null) {
+                System.out.println("-------------" + showDetails.description());
+                if (showDetails.description() != "Not_Found") {
                   return complete(StatusCodes.OK);
                 } else {
                   return complete(StatusCodes.NOT_FOUND, "Show not found");
@@ -229,6 +235,7 @@ public class BookingRoutes {
                 }
               });
             })),
+        // API-8
         pathPrefix("bookings",
             () -> pathEnd(() -> delete(() -> {
               return onSuccess(deleteAllBookings(), response -> {

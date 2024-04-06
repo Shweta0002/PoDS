@@ -41,10 +41,6 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   public final static record AddBooking(Booking booking, ActorRef<ShowRegistry.Booking> replyTo) implements Command {
   }
 
-  public final record DeleteUserBooking(Integer user_id, Integer show_id, ActorRef<ShowRegistry.Response> replyTo)
-      implements Command {
-  }
-
   private BookingRegistry(ActorContext<Command> context) {
     super(context);
     count = 0;
@@ -113,7 +109,6 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
     return newReceiveBuilder()
         .onMessage(GetTheatres.class, this::onGetTheatres)
         .onMessage(AddBooking.class, this::onAddBooking)
-        .onMessage(DeleteUserBooking.class, this::onDeleteUserBooking)
         .build();
   }
 
@@ -136,12 +131,6 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
       showActors.get(show_id)
           .tell(new ShowRegistry.AddBooking(new ShowRegistry.Booking(count, user_id, show_id, seats_booked), replyTo));
     }
-    return this;
-  }
-
-  private Behavior<Command> onDeleteUserBooking(DeleteUserBooking command) {
-    showActors.get(command.show_id)
-        .tell(new ShowRegistry.DeleteUserBooking(command.user_id, command.show_id, command.replyTo));
     return this;
   }
 

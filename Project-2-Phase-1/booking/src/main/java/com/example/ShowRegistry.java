@@ -161,6 +161,13 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
         while (iter.hasNext()) {
             Booking currentBooking = iter.next();
             if (Objects.equals(currentBooking.show_id, command.show_id)) {
+
+                // // Amount to make these bookin to be returned to users wallets
+                // String walletRefundStatus =
+                // WalletServiceHelper.refund(currentBooking.user_id,
+                // currentBooking.seats_booked * this.price, http);
+                // System.out.println("walletRefundStatus - " + walletRefundStatus);
+
                 this.seats_available += currentBooking.seats_booked;
                 iter.remove();
             }
@@ -215,14 +222,27 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
 
     private Behavior<Command> onDeleteUserBooking(DeleteUserBooking command) {
         ListIterator<Booking> iter = bookings.listIterator();
+        boolean hasBookings = false;
         while (iter.hasNext()) {
             Booking currentBooking = iter.next();
-            if (Objects.equals(currentBooking.user_id, command.user_id)) {
+            if (Objects.equals(currentBooking.show_id, command.show_id)
+                    && Objects.equals(currentBooking.user_id, command.user_id)) {
+                hasBookings = true;
+
+                // Amount to make these bookin to be returned to users wallets
+                String walletRefundStatus = WalletServiceHelper.refund(command.user_id,
+                        currentBooking.seats_booked * this.price, http);
+                System.out.println("walletRefundStatus - " + walletRefundStatus);
+
                 seats_available += currentBooking.seats_booked;
                 iter.remove();
             }
         }
-        command.replyTo().tell(new Response("Done"));
+        if (hasBookings) {
+            command.replyTo().tell(new Response("Done"));
+        } else {
+            command.replyTo().tell(new Response("Not_Found"));
+        }
         return this;
     }
 
