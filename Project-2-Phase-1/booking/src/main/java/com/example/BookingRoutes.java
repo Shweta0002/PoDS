@@ -151,7 +151,11 @@ public class BookingRoutes {
             () -> pathEnd(() -> get(
                 () -> onSuccess(getTheatres(), theatres -> complete(StatusCodes.OK, theatres.theatres(),
                     Jackson.marshaller()))))),
+        // API-3
         pathPrefix("shows", () -> path(PathMatchers.segment(), (String show_id) -> get(() -> {
+          if (Integer.parseInt(show_id) > 20 || Integer.parseInt(show_id) < 1) {
+            return complete(StatusCodes.NOT_FOUND, "Show doesnot exist");
+          }
           return onSuccess(getShow(Integer.parseInt(show_id)), showDetails -> {
             if (showDetails != null) {
               return complete(StatusCodes.OK, showDetails, Jackson.marshaller());
