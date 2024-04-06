@@ -8,6 +8,7 @@ import akka.actor.typed.javadsl.Behaviors;
 import akka.actor.typed.javadsl.Receive;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import akka.http.javadsl.Http;
 
 import java.util.*;
 import java.io.*;
@@ -17,6 +18,8 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
     // actor protocol
     sealed interface Command {
     }
+
+    final Http http = Http.get(getContext().getSystem());
 
     // Instance variables
     public Integer id;
@@ -64,7 +67,7 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
             implements Command {
     }
 
-    public final record DeleteAllBookings(Integer show_id, ActorRef<ShowRegistry.Response> replyTo)
+    public final record DeleteAllBookings(ActorRef<ShowRegistry.Response> replyTo)
             implements Command {
     }
 
@@ -135,6 +138,12 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
             if (Objects.equals(currentBooking.user_id, command.user_id)
                     && Objects.equals(currentBooking.show_id, command.show_id)) {
                 hasBookings = true;
+
+                // Amount to make these bookin to be returned to users wallets
+                String walletRefundStatus = WalletServiceHelper.refund(command.user_id,
+                        currentBooking.seats_booked * this.price, http);
+                System.out.println("walletRefundStatus - " + walletRefundStatus);
+
                 this.seats_available += currentBooking.seats_booked;
                 iter.remove();
             }
@@ -148,13 +157,27 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
     }
 
     private Behavior<Command> onDeleteAllBookings(DeleteAllBookings command) {
+        Map<Integer, Integer> totalRefunds = new HashMap<>();
+
         ListIterator<Booking> iter = bookings.listIterator();
         while (iter.hasNext()) {
             Booking currentBooking = iter.next();
-            if (Objects.equals(currentBooking.show_id, command.show_id)) {
-                this.seats_available += currentBooking.seats_booked;
-                iter.remove();
+            if (totalRefunds.containsKey(currentBooking.user_id)) {
+                totalRefunds.put(currentBooking.user_id,
+                        totalRefunds.get(currentBooking.user_id)
+                                + currentBooking.seats_booked * BookingRegistry.showPrices.get(currentBooking.show_id));
+            } else {
+                totalRefunds.put(currentBooking.user_id,
+                        currentBooking.seats_booked * BookingRegistry.showPrices.get(currentBooking.show_id));
             }
+
+            this.seats_available += currentBooking.seats_booked;
+            iter.remove();
+        }
+
+        for (int user_id : totalRefunds.keySet()) {
+            // Amount to make these bookin to be returned to users wallets
+            String walletRefundStatus = WalletServiceHelper.refund(user_id, totalRefunds.get(user_id), http);
         }
         command.replyTo().tell(new Response("Done"));
         return this;
@@ -165,23 +188,68 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
         Integer user_id = command.booking.user_id;
         Integer show_id = command.booking.show_id;
         Integer seats_booked = command.booking.seats_booked;
-        this.seats_available = this.seats_available - seats_booked;
-        Booking newBooking = new Booking(id, user_id, show_id, seats_booked);
-        bookings.add(newBooking);
-        command.replyTo().tell(newBooking);
+
+        // If the number of seats available for the show is less than seats_booked,
+        // return HTTP 400 (Bad Request)
+        if (this.seats_available < seats_booked) {
+            command.replyTo.tell(new ShowRegistry.Booking(null, null, null, null));
+        } else {
+            // Ensure the user exists for whom booking is to be added
+            if (!UserServiceHelper.doesUserExist(user_id, http)) {
+                command.replyTo.tell(new ShowRegistry.Booking(null, null, null, null));
+            } else {
+                String walletReductionStatus = WalletServiceHelper.payment(user_id, seats_booked * this.price, http);
+                System.out.println("walletReductionStatus - " + walletReductionStatus);
+
+                if (walletReductionStatus == "FAIL") {
+                    command.replyTo.tell(new ShowRegistry.Booking(null, null, null, null));
+                } else {
+
+                    ListIterator<Booking> iter = bookings.listIterator();
+                    Booking newBooking = new Booking(id, user_id, show_id, seats_booked);
+                    while (iter.hasNext()) {
+                        Booking currentBooking = iter.next();
+                        if (Objects.equals(currentBooking.show_id, show_id)
+                                && Objects.equals(currentBooking.user_id, user_id)) {
+                            // seats_available += currentBooking.seats_booked;
+                            newBooking = new Booking(currentBooking.id, user_id, show_id,
+                                    currentBooking.seats_booked + seats_booked);
+                            iter.remove();
+                        }
+                    }
+
+                    this.seats_available = this.seats_available - seats_booked;
+                    bookings.add(newBooking);
+                    command.replyTo().tell(newBooking);
+                }
+            }
+        }
         return this;
     }
 
     private Behavior<Command> onDeleteUserBooking(DeleteUserBooking command) {
         ListIterator<Booking> iter = bookings.listIterator();
+        boolean hasBookings = false;
         while (iter.hasNext()) {
             Booking currentBooking = iter.next();
-            if (Objects.equals(currentBooking.user_id, command.user_id)) {
+            if (Objects.equals(currentBooking.show_id, command.show_id)
+                    && Objects.equals(currentBooking.user_id, command.user_id)) {
+                hasBookings = true;
+
+                // Amount to make these bookin to be returned to users wallets
+                String walletRefundStatus = WalletServiceHelper.refund(command.user_id,
+                        currentBooking.seats_booked * this.price, http);
+                System.out.println("walletRefundStatus - " + walletRefundStatus);
+
                 seats_available += currentBooking.seats_booked;
                 iter.remove();
             }
         }
-        command.replyTo().tell(new Response("Done"));
+        if (hasBookings) {
+            command.replyTo().tell(new Response("Done"));
+        } else {
+            command.replyTo().tell(new Response("Not_Found"));
+        }
         return this;
     }
 

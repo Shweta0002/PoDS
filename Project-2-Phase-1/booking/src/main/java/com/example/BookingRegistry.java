@@ -18,6 +18,7 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
 
   // Stores show actors for each showId
   public static final Map<Integer, ActorRef<ShowRegistry.Command>> showActors = new HashMap<>();
+  public static final Map<Integer, Integer> showPrices = new HashMap<>();
 
   // Stores list of theatres
   public static final List<Theatres> allTheatres = new ArrayList<>();
@@ -39,10 +40,6 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
   }
 
   public final static record AddBooking(Booking booking, ActorRef<ShowRegistry.Booking> replyTo) implements Command {
-  }
-
-  public final record DeleteUserBooking(Integer user_id, Integer show_id, ActorRef<ShowRegistry.Response> replyTo)
-      implements Command {
   }
 
   private BookingRegistry(ActorContext<Command> context) {
@@ -99,6 +96,7 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
       int price = Integer.parseInt(str[3]);
       int seats_available = Integer.parseInt(str[4]);
 
+      showPrices.put(show_id, price);
       showActors.put(show_id,
           context.spawn(ShowRegistry.create(show_id, theatre_id, title, price, seats_available), "Show" + show_id));
     }
@@ -113,7 +111,6 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
     return newReceiveBuilder()
         .onMessage(GetTheatres.class, this::onGetTheatres)
         .onMessage(AddBooking.class, this::onAddBooking)
-        .onMessage(DeleteUserBooking.class, this::onDeleteUserBooking)
         .build();
   }
 
@@ -128,14 +125,14 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command> {
     Integer show_id = command.booking.show_id;
     Integer seats_booked = command.booking.seats_booked;
     ActorRef<ShowRegistry.Booking> replyTo = command.replyTo;
-    showActors.get(show_id)
-        .tell(new ShowRegistry.AddBooking(new ShowRegistry.Booking(count, user_id, show_id, seats_booked), replyTo));
-    return this;
-  }
 
-  private Behavior<Command> onDeleteUserBooking(DeleteUserBooking command) {
-    showActors.get(command.show_id)
-        .tell(new ShowRegistry.DeleteUserBooking(command.user_id, command.show_id, command.replyTo));
+    // If the show does not exist, return HTTP 400 (Bad Request)
+    if (show_id > 20 || show_id < 1) {
+      replyTo.tell(new ShowRegistry.Booking(null, null, null, null));
+    } else {
+      showActors.get(show_id)
+          .tell(new ShowRegistry.AddBooking(new ShowRegistry.Booking(count, user_id, show_id, seats_booked), replyTo));
+    }
     return this;
   }
 
