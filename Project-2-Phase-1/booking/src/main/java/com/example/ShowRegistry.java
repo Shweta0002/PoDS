@@ -138,6 +138,12 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
             if (Objects.equals(currentBooking.user_id, command.user_id)
                     && Objects.equals(currentBooking.show_id, command.show_id)) {
                 hasBookings = true;
+
+                // Amount to make these bookin to be returned to users wallets
+                String walletRefundStatus = WalletServiceHelper.refund(command.user_id,
+                        currentBooking.seats_booked * this.price, http);
+                System.out.println("walletRefundStatus - " + walletRefundStatus);
+
                 this.seats_available += currentBooking.seats_booked;
                 iter.remove();
             }
@@ -179,7 +185,8 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
                 command.replyTo.tell(new ShowRegistry.Booking(null, null, null, null));
             } else {
                 String walletReductionStatus = WalletServiceHelper.payment(user_id, seats_booked * this.price, http);
-                System.out.println(walletReductionStatus);
+                System.out.println("walletReductionStatus - " + walletReductionStatus);
+
                 if (walletReductionStatus == "FAIL") {
                     command.replyTo.tell(new ShowRegistry.Booking(null, null, null, null));
                 } else {
@@ -198,8 +205,6 @@ public class ShowRegistry extends AbstractBehavior<ShowRegistry.Command> {
                     }
 
                     this.seats_available = this.seats_available - seats_booked;
-                    // Booking newBooking = new Booking(id, user_id, show_id, seats_booked);
-                    System.out.println("-------------" + newBooking);
                     bookings.add(newBooking);
                     command.replyTo().tell(newBooking);
                 }

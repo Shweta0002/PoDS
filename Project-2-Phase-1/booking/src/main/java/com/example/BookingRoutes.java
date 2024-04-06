@@ -184,7 +184,6 @@ public class BookingRoutes {
                 Jackson.unmarshaller(BookingRegistry.Booking.class),
                 booking -> onSuccess(addBooking(booking), bookingDetails -> {
                   if (bookingDetails.id() != null) {
-                    System.out.println("API5" + "----" + bookingDetails);
                     return complete(StatusCodes.OK);
                   } else {
                     return complete(StatusCodes.BAD_REQUEST, "Some error occured");
@@ -219,13 +218,14 @@ public class BookingRoutes {
                 }
               });
             })),
+        // API-6
         path(PathMatchers.segment("bookings").slash("users").slash(PathMatchers.segment()),
             (String user_id) -> delete(() -> {
               return onSuccess(deleteAllUserBookings(Integer.parseInt(user_id)), bookingDetails -> {
                 if (bookingDetails.size() != 0) {
                   return complete(StatusCodes.OK);
                 } else {
-                  return complete(StatusCodes.NOT_FOUND, "Show not found");
+                  return complete(StatusCodes.NOT_FOUND, "No shows for user exist");
                 }
               });
             })),
