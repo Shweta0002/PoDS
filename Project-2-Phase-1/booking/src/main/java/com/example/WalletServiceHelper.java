@@ -25,7 +25,7 @@ public class WalletServiceHelper {
         Integer timeout = PAYMENT_MAX_RETRY;
 
         // TODO: change it to docker base url
-        String url = "http://localhost:8082/wallets/" + userId;
+        String url = "http://host.docker.internal:8082/wallets/" + userId;
 
         Map<String, Object> data = Map.of("action", action, "amount", amount.toString());
         ObjectMapper objectMapper = new ObjectMapper();
