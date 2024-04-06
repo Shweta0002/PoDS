@@ -146,9 +146,10 @@ public class BookingRoutes {
 
   public Route bookingRoutes() {
     return concat(
+        // API-1
         pathPrefix("theatres",
             () -> pathEnd(() -> get(
-                () -> onSuccess(getTheatres(), theatres -> complete(StatusCodes.OK, theatres,
+                () -> onSuccess(getTheatres(), theatres -> complete(StatusCodes.OK, theatres.theatres(),
                     Jackson.marshaller()))))),
         pathPrefix("shows", () -> path(PathMatchers.segment(), (String show_id) -> get(() -> {
           return onSuccess(getShow(Integer.parseInt(show_id)), showDetails -> {
@@ -159,9 +160,13 @@ public class BookingRoutes {
             }
           });
         }))),
+        // API-2
         path(PathMatchers.segment("shows").slash("theatres").slash(PathMatchers.segment()),
             (String theatre_id) -> get(() -> {
               return onSuccess(getShowsOfTheatre(Integer.parseInt(theatre_id)), showDetails -> {
+                if (Integer.parseInt(theatre_id) > 10 || Integer.parseInt(theatre_id) < 1) {
+                  return complete(StatusCodes.NOT_FOUND, "Theatre doesnot exist");
+                }
                 if (showDetails != null) {
                   return complete(StatusCodes.OK, showDetails, Jackson.marshaller());
                 } else {
