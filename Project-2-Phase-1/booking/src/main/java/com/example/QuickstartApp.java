@@ -22,7 +22,7 @@ import java.util.concurrent.CompletionStage;
 public class QuickstartApp {
     // #start-http-server
     static void startHttpServer(Route route, ActorSystem<?> system) {
-        CompletionStage<ServerBinding> futureBinding = Http.get(system).newServerAt("0.0.0.0", 8081).bind(route);
+        CompletionStage<ServerBinding> futureBinding = Http.get(system).newServerAt("0.0.0.0", 8080).bind(route);
 
         futureBinding.whenComplete((binding, exception) -> {
             if (binding != null) {
