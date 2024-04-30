@@ -52,14 +52,14 @@ public class UserService {
 
 // Delete bookings
         try {
-            restTemplate.delete("http://dev-booking-service:8081/bookings/users/"+ userId);
+            restTemplate.delete("http://host.docker.internal:8081/bookings/users/"+ userId);
         } catch (HttpClientErrorException.NotFound e) {
             // Ignore the 404 error if the user doesn't have any bookings
         }
 
 // Delete wallet
         try {
-            restTemplate.delete("http://dev-wallet-service:8082/wallets/"+ userId);
+            restTemplate.delete("http://host.docker.internal:8082/wallets/"+ userId);
         } catch (HttpClientErrorException.NotFound e) {
             // Ignore the 404 error if the user doesn't have any bookings
         }
@@ -69,10 +69,10 @@ public class UserService {
 
     public void deleteAllUsers() {
         // Delete all user records from Booking service
-        restTemplate.delete("http://dev-booking-service:8081/bookings");
+        restTemplate.delete("http://host.docker.internal:8081/bookings");
 
         // Delete all user records from Wallet service
-        restTemplate.delete("http://dev-wallet-service:8082/wallets");
+        restTemplate.delete("http://host.docker.internal:8082/wallets");
 
         // Delete all user records from User service
         userRepository.deleteAll();
