@@ -16,7 +16,7 @@ import akka.http.javadsl.server.PathMatchers;
 import akka.http.javadsl.server.Route;
 
 public class BookingRoutes {
-  private final ActorRef<BookingRegistry.Command> bookingRegistryActor;
+  private  ActorRef<BookingRegistry.Command> bookingRegistryActor;
   private final Duration askTimeout;
   private final Scheduler scheduler;
 
@@ -27,10 +27,12 @@ public class BookingRoutes {
   }
 
   private CompletionStage<BookingRegistry.Theatres> getTheatre() {
+  
     return AskPattern.ask(bookingRegistryActor, BookingRegistry.GetTheatre::new, askTimeout, scheduler);
   }
 
   private CompletionStage<ShowActor.Show> getShow(Integer show_id) {
+    System.out.println("Inside getShow");
     return AskPattern.ask(bookingRegistryActor,ref->new BookingRegistry.GetShow(show_id,ref), askTimeout, scheduler);
   }
   private CompletionStage<BookingRegistry.Bookings> getUserBookings(Integer user_id) {
@@ -67,7 +69,9 @@ private CompletionStage<WorkerActor.Showlist> getShowByTheatre(Integer theatre_i
                                 ))),
                 pathPrefix("shows", () -> path(PathMatchers.segment(), (String show_id) -> get(() -> {
                   return onSuccess(getShow(Integer.parseInt(show_id)), showDetails -> {
+                    System.out.println("Show details: " + show_id);
                     if (showDetails.title() != null) {
+                      System.out.println("Show details: " + showDetails);
                       return complete(StatusCodes.OK, showDetails, Jackson.marshaller());
                     } else {
                       return complete(StatusCodes.NOT_FOUND, "Show not found");

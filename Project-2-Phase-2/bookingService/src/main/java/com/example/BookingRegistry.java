@@ -20,11 +20,8 @@ import akka.cluster.sharding.typed.javadsl.ClusterSharding;
 import akka.cluster.sharding.typed.javadsl.EntityRef;
 
 import java.io.Console;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
-import com.CborSerializable;
+import com.example.CborSerializable;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -33,7 +30,7 @@ import com.typesafe.config.ConfigFactory;
 
 
 public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command>  {
-  public static final Map<Integer,ActorRef<ShowActor.Command>> showActors =new HashMap<>();
+  public static Map<Integer,EntityRef<ShowActor.Command>> showActors =new HashMap<>();
   public static final List<Theatre> theatres=new ArrayList<>();
   public Integer count;
   sealed interface Command  extends CborSerializable{}
@@ -59,12 +56,14 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command>  
   public final record DeleteUserBooking( Integer user_id,Integer show_id, ActorRef<ShowActor.Response> replyTo) implements Command{}
 
   public ActorRef<WorkerActor.Command> router;
-  public ClusterSharding sharding;
-  private BookingRegistry(ActorContext<Command> context, ActorRef<WorkerActor.Command> router,ClusterSharding sharding) {
+
+  private BookingRegistry(ActorContext<Command> context, ActorRef<WorkerActor.Command> router,Map<Integer,EntityRef<ShowActor.Command>> showActors) {
     super(context);
     this.router = router;
-   this.sharding = sharding;
-    count=0;
+   this.showActors = showActors;
+   getContext().getLog().info("Greeting {} for {}");
+   getContext().getLog().info(Integer.toString(showActors.size())); 
+   count=0;
     String[] theatresList = { "1,Helen Hayes Theater,240 W 44th St.",
             "2,Cherry Lane Theatre,38 Commerce Street",
             "3,New World Stages,340 West 50th Street",
@@ -145,9 +144,9 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command>  
   
 
 
-  public static Behavior<Command> create(ActorRef<WorkerActor.Command> router,ClusterSharding sharding) {
+  public static Behavior<Command> create(ActorRef<WorkerActor.Command> router,Map<Integer,EntityRef<ShowActor.Command>> showActors) {
 
-    return Behaviors.setup(context->(new BookingRegistry(context, router,sharding)));
+    return Behaviors.setup(context->(new BookingRegistry(context, router,showActors)));
   }
 
   @Override
@@ -174,7 +173,10 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command>  
     else 
     {
       Integer show_id = message.id;
-      EntityRef<ShowActor.Command> ref = sharding.entityRefFor(ShowActor.TypeKey, Integer.toString(show_id));
+      getContext().getLog().info("Show details recv");
+      getContext().getLog().info("Show details to "+ showActors);
+      EntityRef<ShowActor.Command> ref = showActors.get(show_id);
+      getContext().getLog().info("Show ref to "+ ref);
       ref.tell(new ShowActor.GetShow(message.replyTo));
     }
     return this;
@@ -188,7 +190,8 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command>  
         if(show_id>0 && show_id<21 && UserService.isUser(message.booking.user_id,http)){ 
           this.count = this.count + 1;
           ActorRef<ShowActor.Booking> replyTo = message.replyTo;
-          EntityRef<ShowActor.Command> ref = sharding.entityRefFor(ShowActor.TypeKey, Integer.toString(show_id));
+          EntityRef<ShowActor.Command> ref = showActors.get(show_id);
+        
           ref.tell(new ShowActor.AddBooking(new ShowActor.Booking(count, user_id, show_id, seats_booked), replyTo));
         }
         else{
@@ -201,7 +204,7 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command>  
     if(message.show_id>20 || message.show_id<1)
       message.replyTo.tell(new ShowActor.Response(false));
     else {
-      EntityRef<ShowActor.Command> ref = sharding.entityRefFor(ShowActor.TypeKey, Integer.toString(message.show_id));
+      EntityRef<ShowActor.Command> ref = showActors.get(message.show_id);
       ref.tell(new ShowActor.DeleteUserBooking(message.user_id, message.show_id, message.replyTo, null));
     }
     return this;
@@ -209,13 +212,13 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command>  
 
   private Behavior<Command> onDeleteAllUserBookings(DeleteAllUserBookings message) {
     //ActorRef<WorkerActor.Command> workerActor = getContext().spawn(WorkerActor.create(), "Worker" + message.user_id);
-    this.router.tell(new WorkerActor.DeleteAllUserBookings(message.replyTo, message.user_id, this.sharding));
+    this.router.tell(new WorkerActor.DeleteAllUserBookings(message.replyTo, message.user_id));
     return this;
   }
 
   private Behavior<Command> onGetUserBookings(GetUserBookings message) {
     //ActorRef<WorkerActor.Command> workerActor = getContext().spawn(WorkerActor.create(), "Worker" + message.user_id);
-    this.router.tell(new WorkerActor.GetUserBookings(message.replyTo, message.user_id, this.sharding));
+    this.router.tell(new WorkerActor.GetUserBookings(message.replyTo, message.user_id));
     return this;
   }
 
@@ -224,14 +227,15 @@ public class BookingRegistry extends AbstractBehavior<BookingRegistry.Command>  
         message.replyTo.tell(new WorkerActor.Showlist(null));
     else{
       //ActorRef<WorkerActor.Command> workerActorRef = getContext().spawn(WorkerActor.create(), "Worker" + message.theatre_id);
-      this.router.tell(new WorkerActor.ShowByTheatre(message.theatre_id, message.replyTo, this.sharding));
+       System.out.println("Booking shard actor: "+showActors.get(1));
+      this.router.tell(new WorkerActor.ShowByTheatre(message.theatre_id, message.replyTo));
     }
     return this;
   }
 
   private Behavior<Command> onDeleteAllBookings(DeleteAllBookings message) {
     //ActorRef<WorkerActor.Command> workerActor = getContext().spawn(WorkerActor.create(), "Worker");
-    this.router.tell(new WorkerActor.DeleteAllBookings(message.replyTo, this.sharding));
+    this.router.tell(new WorkerActor.DeleteAllBookings(message.replyTo));
     return this;
   }
 
