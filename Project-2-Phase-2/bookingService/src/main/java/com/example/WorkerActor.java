@@ -12,10 +12,11 @@ import akka.cluster.sharding.typed.javadsl.ClusterSharding;
 import akka.cluster.sharding.typed.javadsl.EntityRef;
 import java.util.*;
 
-import com.CborSerializable;
+import com.example.CborSerializable;
+
 
 public class WorkerActor extends AbstractBehavior<WorkerActor.Command>  {
-    //public Map<Integer,ActorRef<ShowActor.Command>> showActors;
+    public Map<Integer,EntityRef<ShowActor.Command>> showActors;
     public Integer user_id;
     public ActorRef<BookingRegistry.Bookings> replyTo;
     public ActorRef<ShowActor.Response> replyToDelete;
@@ -28,11 +29,10 @@ public class WorkerActor extends AbstractBehavior<WorkerActor.Command>  {
     List<ShowActor.Show> showOfTheatre =new ArrayList<>();
 
     sealed interface Command extends CborSerializable{}
-    public final ClusterSharding sharding;
-    public final record GetUserBookings(ActorRef<BookingRegistry.Bookings> replyTo, Integer user_id, ClusterSharding sharding) implements Command{}
-    public final record DeleteAllUserBookings(ActorRef<ShowActor.Response> replyTo, Integer user_id, ClusterSharding sharding) implements Command{}
+    public final record GetUserBookings(ActorRef<BookingRegistry.Bookings> replyTo, Integer user_id) implements Command{}
+    public final record DeleteAllUserBookings(ActorRef<ShowActor.Response> replyTo, Integer user_id) implements Command{}
 
-    public final record DeleteAllBookings(ActorRef<WorkerActor.DeleteResponse> replyTo, ClusterSharding sharding) implements Command{}
+    public final record DeleteAllBookings(ActorRef<WorkerActor.DeleteResponse> replyTo) implements Command{}
 
     public final record GetShowBookings(List<ShowActor.Booking> bookings) implements Command{}
 
@@ -46,21 +46,21 @@ public class WorkerActor extends AbstractBehavior<WorkerActor.Command>  {
 
 
 
-    public final record ShowByTheatre(Integer theatre_id,ActorRef<Showlist> replyTo, ClusterSharding sharding) implements Command{}
+    public final record ShowByTheatre(Integer theatre_id,ActorRef<Showlist> replyTo) implements Command{}
     public final record TheatreOfShow(Boolean status,ShowActor.Show showDetails,Integer i,ActorRef<Showlist> replyTo) implements Command{}
 
     
 
     //private WorkerActor(ActorContext<Command> context, Map<Integer,ActorRef<ShowActor.Command>> showActors) {
-    private WorkerActor(ActorContext<Command> context,ClusterSharding sharding) {
+    private WorkerActor(ActorContext<Command> context,Map<Integer,EntityRef<ShowActor.Command>> showActors) {
         super(context);
-        this.numProcessed = 0;
-        this.sharding = sharding;
+        this.numProcessed = 1;
+        this.showActors = showActors;
         this.selfRef = getContext().getSelf(); 
     }
 
-    public static Behavior<Command> create(ClusterSharding sharding) {
-        return Behaviors.setup(context->new WorkerActor(context,sharding));
+    public static Behavior<Command> create(Map<Integer,EntityRef<ShowActor.Command>> showActors) {
+        return Behaviors.setup(context->new WorkerActor(context,showActors));
     }
 
     @Override
@@ -82,26 +82,28 @@ public class WorkerActor extends AbstractBehavior<WorkerActor.Command>  {
         for (ShowActor.Booking b : message.bookings) {
             this.userBookings.add(new BookingRegistry.Booking(b.id(), b.user_id(), b.show_id(), b.seats_booked()));
         }
-        if(this.numProcessed == 20){
+        if(this.numProcessed == 21){
             List<BookingRegistry.Booking> result = new ArrayList<>();
             for (BookingRegistry.Booking b : this.userBookings){
                 if(b.user_id() == this.user_id)
                     result.add(b);
             }
             this.replyTo.tell(new BookingRegistry.Bookings(Collections.unmodifiableList(new ArrayList<>(result))));
-            return Behaviors.stopped();
+            //return Behaviors.stopped();
+            return this;
+        }
+        else{
+            EntityRef<ShowActor.Command> ref = showActors.get(numProcessed);
+            ref.tell(new ShowActor.GetBookings(this.selfRef));
         }
         return this;
     }
 
     private Behavior<Command> onGetUserBookings(GetUserBookings message) {
-        ClusterSharding shard = this.sharding;
         this.replyTo = message.replyTo;
         this.user_id = message.user_id;
-        for (int i=1;i<=20;i++) {
-            EntityRef<ShowActor.Command> ref = sharding.entityRefFor(ShowActor.TypeKey, Integer.toString(i));
-            ref.tell(new ShowActor.GetBookings(this.selfRef));
-        }
+        EntityRef<ShowActor.Command> ref = showActors.get(1);
+        ref.tell(new ShowActor.GetBookings(this.selfRef));
         return this;
     }
 
@@ -111,16 +113,17 @@ public class WorkerActor extends AbstractBehavior<WorkerActor.Command>  {
             this.showOfTheatre.add(message.showDetails);
         if(message.i == 0){
             message.replyTo().tell(new Showlist(showOfTheatre));
-            return Behaviors.stopped();
+            //return Behaviors.stopped();
+            return this;
         }
         return this;
     }
 
     private Behavior<Command> onShowByTheatre(ShowByTheatre message) {
-        ClusterSharding shard = this.sharding;
         int i=20;
+        System.out.println("WorkerActor: onShowByTheatre"+showActors.get(1));
         for (int k=1;k<=20;k++) {
-            EntityRef<ShowActor.Command> ref = shard.entityRefFor(ShowActor.TypeKey, Integer.toString(i));
+            EntityRef<ShowActor.Command> ref = showActors.get(1);
            ref.tell(new ShowActor.GetTheatre(this.selfRef, --i, message.theatre_id,message.replyTo));
         }
         return this;
@@ -132,17 +135,18 @@ public class WorkerActor extends AbstractBehavior<WorkerActor.Command>  {
         if(message.flag())
             this.flag = true;
 
-        if(this.numProcessed == 20){
+        if(this.numProcessed == 21){
             this.replyToDelete.tell(new ShowActor.Response(this.flag));
-            return Behaviors.stopped();
+            this.numProcessed = 1;
+            this.flag=  false;
+            return this;
         }
         return this;
     }
 
     private Behavior<Command> onDeleteAllUserBookings(DeleteAllUserBookings message) {
-        ClusterSharding shard = this.sharding;
         this.replyToDelete = message.replyTo;
-            EntityRef<ShowActor.Command> ref = shard.entityRefFor(ShowActor.TypeKey, Integer.toString(1));
+            EntityRef<ShowActor.Command> ref = showActors.get(1);
             ref.tell(new ShowActor.DeleteUserBooking(message.user_id, 1, null, this.selfRef));
         return this;
     }
@@ -157,20 +161,21 @@ public class WorkerActor extends AbstractBehavior<WorkerActor.Command>  {
 
         if(this.numProcessed == 21){
             this.replyToDeleteAll.tell(new DeleteResponse(this.flag));
+            this.numProcessed = 1;
+            this.flag = false;
             return this;
         }
         else {
-        EntityRef<ShowActor.Command> ref = sharding.entityRefFor(ShowActor.TypeKey, Integer.toString(numProcessed));
+        EntityRef<ShowActor.Command> ref = showActors.get(numProcessed);
         ref.tell(new ShowActor.DeleteAllBookings(this.selfRef));
         }
         return this;
     }
 
     private Behavior<Command> onDeleteAllBookings(DeleteAllBookings message) {
-        ClusterSharding shard = this.sharding;
         this.replyToDeleteAll = message.replyTo;
         getContext().getLog().info("Show id: "+user_id);
-        EntityRef<ShowActor.Command> ref = shard.entityRefFor(ShowActor.TypeKey, Integer.toString(1));
+        EntityRef<ShowActor.Command> ref = showActors.get(1);
         ref.tell(new ShowActor.DeleteAllBookings(this.selfRef));
 
         return this;

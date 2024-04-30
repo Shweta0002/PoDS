@@ -16,7 +16,7 @@ import akka.cluster.sharding.typed.javadsl.EntityRef;
 
 import java.util.*;
 
-import com.CborSerializable;
+import com.example.CborSerializable;
 
 public class ShowActor extends AbstractBehavior<ShowActor.Command>  {
 
@@ -72,7 +72,10 @@ public class ShowActor extends AbstractBehavior<ShowActor.Command>  {
     }
 
     private Behavior<Command> onGetShow(GetShow message) {
+        getContext().getLog().info("Show details recv");
+        getContext().getLog().info("Show details to "+ message.replyTo());
         message.replyTo().tell(new Show(this.id,this.theatre_id,this.title,this.price,this.seats_available));
+        getContext().getLog().info("Show details sent");
         return this;
     }
     private Behavior<Command> onAddBooking(AddBooking message) {

@@ -1,7 +1,7 @@
-    # Use an official OpenJDK runtime as a parent image
+# Use an official OpenJDK runtime as a parent image
 FROM openjdk:17
 
-# Set the working directory to /walletapp
+# Set the working directory to /app
 WORKDIR /walletService
 
 # Copy the current directory contents into the container at /walletService
@@ -10,8 +10,7 @@ COPY . .
 # Install Maven
 RUN microdnf install -y maven
 
-# Build the projects with Maven
 RUN mvn clean install
 
+ENTRYPOINT ["java" ,"-jar","target/walletService-0.0.1-SNAPSHOT.jar"]
 
-ENTRYPOINT ["java" ,"-jar","target/walletService-0.0.1.jar"]
