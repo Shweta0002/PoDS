@@ -32,7 +32,7 @@ public class ServiceWalletService {
             //check if user exists else 404
             ResponseEntity<ServiceUser> response
                     = restTemplate.getForEntity(
-                    "http://anushka-userservice:8080/users/{userId}",
+                    "http://host.docker.internal:8080/users/{userId}",
                     ServiceUser.class, params);
 
             if (response.getBody()!=null) {
@@ -56,7 +56,7 @@ public class ServiceWalletService {
             //check valid user
             ResponseEntity<ServiceUser> response
                     = restTemplate.getForEntity(
-                    "http://anushka-userservice:8080/users/{userId}",
+                    "http://host.docker.internal:8080/users/{userId}",
                     ServiceUser.class, params);
 
             if (response.hasBody()) {
@@ -86,7 +86,7 @@ public class ServiceWalletService {
             try {
                 ResponseEntity<ServiceUser> response
                         = restTemplate.getForEntity(
-                        "http://anushka-userservice:8080/users/{userId}",
+                        "http://host.docker.internal:8080/users/{userId}",
                         ServiceUser.class, params);
 
                 if (response.hasBody()) {

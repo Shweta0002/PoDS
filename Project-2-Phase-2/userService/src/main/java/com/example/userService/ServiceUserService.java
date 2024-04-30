@@ -57,7 +57,7 @@ public class ServiceUserService {
 
     //send request to booking service to delete bookings by user id
     public ResponseEntity<?> deleteAllBookingsUser(Integer id){
-        String url = "http://sakshi-bookingservice:8081/bookings/users/{id}";
+        String url = "http://host.docker.internal:8081/bookings/users/{id}";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
@@ -81,7 +81,7 @@ public class ServiceUserService {
 
     //send request to wallet to delete wallet by user id
     public ResponseEntity<?> deleteAllWalletsUsers(Integer id){
-        String url = "http://sakshi-walletservice:8082/wallets/{id}";
+        String url = "http://host.docker.internal:8082/wallets/{id}";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
@@ -105,7 +105,7 @@ public class ServiceUserService {
 
     //send request to booking to delete all bookings
     public ResponseEntity<?> deleteBookings() {
-        String url = "http://sakshi-bookingservice:8081/bookings";
+        String url = "http://host.docker.internal:8081/bookings";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
@@ -126,7 +126,7 @@ public class ServiceUserService {
     //send request to wallet to delete all wallets
 
         public ResponseEntity<?> deleteWallets(){
-            String url = "http://sakshi-walletservice:8082/wallets";
+            String url = "http://host.docker.internal:8082/wallets";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> requestEntity = new HttpEntity<>(headers);
