@@ -192,7 +192,7 @@ public class BookingRoutes {
                 Jackson.unmarshaller(BookingRegistry.Booking.class),
                 booking -> onSuccess(addBooking(booking), bookingDetails -> {
                   if (bookingDetails.id() != null) {
-                    return complete(StatusCodes.OK);
+                    return complete(StatusCodes.OK, bookingDetails, Jackson.marshaller());
                   } else {
                     return complete(StatusCodes.BAD_REQUEST, "Some error occured");
                   }
